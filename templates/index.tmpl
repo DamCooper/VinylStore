@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Vinyl Records for Sale</title>
+    <link rel="stylesheet" href="/css/styles.css">
+  </head>
+  <body>
+    <h1>Vinyl Records for Sale</h1>
+
+    <form action="/search" method="post">
+      <input type="text" name="query">
+      <input type="submit" value="Search">
+    </form>
+
+    <form action="/" method="get">
+      <select name="sort">
+        <option value="price">Price</option>
+        <option value="title">Title</option>
+        <option value="artist">Artist</option>
+        <option value="genre">Genre</option>
+      </select>
+      <input type="submit" value="Sort">
+    </form>
+    
+    
+    <div class="grid-container">
+      {{ range . }}
+        <div class="grid-item">
+          <div class="record-container">
+            <div class="record">
+              <img style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
+              <div class="title">{{ .Title }}</div>
+              <div class="artist">{{ .Artist }}</div>
+              <div class="genre">{{ .Genre }}</div>
+              <div class="price">{{ .Price }}$</div>
+            </div>
+          </div>
+      </div>
+      {{ end }}
+    </div>
+
+    <script>
+      const images = document.querySelectorAll("img[src='/img/vinyl.svg']");
+    
+      images.forEach(img => {
+        img.style.filter = `hue-rotate(${Math.floor(Math.random() * 360)}deg)`;
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+body {
+font-family: Arial, sans-serif;
+}
+
+header, form {
+text-align: center;
+margin: 20px;
+}
+
+h1 {
+font-size: 36px;
+color: #333;
+}
+
+input[type="text"], input[type="submit"] {
+padding: 10px;
+font-size: 16px;
+}
+
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 20px;
+  }
+  
+  .grid-item {
+    background-color: #f2f2f2;
+    text-align: center;
+    padding: 20px;
+    border-radius: 5px;
+  }
+
+  .record-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  
+  .record {
+    width: 300px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .record img {
+    width: 100%;
+    height: auto;
+  }
+  
+  .record .title {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+  
+  .record .artist {
+    margin-top: 5px;
+  }
+  
+  .record .genre {
+    margin-top: 5px;
+    color: gray;
+  }
+  
+  .record .price {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+  
