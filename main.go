@@ -9,12 +9,16 @@ import (
 )
 
 type Record struct {
-	ID        int
-	Title     string
-	Artist    string
-	Genre     string
-	Price     float64
-	ImagePath string
+	ID             int
+	Title          string
+	Artist         string
+	Genre          string
+	Price          float64
+	ImagePath      string
+	NewItem        bool
+	Sale           bool
+	PreOrder       bool
+	PurchasedCount int
 }
 
 func searchRecords(query string) ([]Record, error) {
@@ -24,7 +28,7 @@ func searchRecords(query string) ([]Record, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT title, artist, genre, price, image_path FROM records WHERE title LIKE ? OR artist LIKE ? OR genre LIKE ?", "%"+query+"%", "%"+query+"%", "%"+query+"%")
+	rows, err := db.Query("SELECT title, artist, genre, price, image_path, PurchasedCount FROM records WHERE title LIKE ? OR artist LIKE ? OR genre LIKE ?", "%"+query+"%", "%"+query+"%", "%"+query+"%")
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +37,7 @@ func searchRecords(query string) ([]Record, error) {
 	var records []Record
 	for rows.Next() {
 		var record Record
-		if err := rows.Scan(&record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath); err != nil {
+		if err := rows.Scan(&record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.PurchasedCount); err != nil {
 			return nil, err
 		}
 		records = append(records, record)
@@ -49,7 +53,6 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 		records, err := searchRecords(query)
 		if err != nil {
-
 			http.Error(w, "1Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -120,7 +123,7 @@ func queryRecords(db *sql.DB, sort string) ([]Record, error) {
 	var records []Record
 	for rows.Next() {
 		var r Record
-		err := rows.Scan(&r.ID, &r.Title, &r.Artist, &r.Genre, &r.Price, &r.ImagePath)
+		err := rows.Scan(&r.ID, &r.Title, &r.Artist, &r.Genre, &r.Price, &r.ImagePath, &r.NewItem, &r.PurchasedCount, &r.Sale, &r.PreOrder)
 		if err != nil {
 			return nil, err
 		}
@@ -128,11 +131,3 @@ func queryRecords(db *sql.DB, sort string) ([]Record, error) {
 	}
 	return records, nil
 }
-
-// func main() {
-// 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-// 		http.ServeFile(w, r, "index.html")
-// 	})
-// 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("public/css"))))
-// 	http.ListenAndServe(":8080", nil)
-// }

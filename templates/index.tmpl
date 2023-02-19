@@ -4,10 +4,25 @@
     <meta charset="UTF-8">
     <title>Vinyl Records for Sale</title>
     <link rel="stylesheet" href="/css/styles.css">
-  </head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    </head>
   <body>
-    <h1>Vinyl Records for Sale</h1>
 
+    <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
+    <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe>
+    <form method="POST" action="/login">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username">
+    
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password">
+    
+      <button type="submit">Login</button>
+    </form>
+    
     <form action="/search" method="post">
       <input type="text" name="query">
       <input type="submit" value="Search">
@@ -23,29 +38,120 @@
       <input type="submit" value="Sort">
     </form>
     
-    
-    <div class="grid-container">
-      {{ range . }}
-        <div class="grid-item">
-          <div class="record-container">
-            <div class="record">
-              <img style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
-              <div class="title">{{ .Title }}</div>
-              <div class="artist">{{ .Artist }}</div>
-              <div class="genre">{{ .Genre }}</div>
-              <div class="price">{{ .Price }}$</div>
-            </div>
-          </div>
-      </div>
-      {{ end }}
-    </div>
 
-    <script>
+
+
+
+    <section class="new-items">
+      <h2 style="display: flex; justify-content: center;">New Items</h2>
+      <div class="owl-carousel owl-theme">
+          {{ range . }}
+            {{ if eq .NewItem true }}
+              <div class="record-container">
+                <div class="record">
+                  <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
+                  <div class="title">{{ .Title }}</div>
+                  <div class="artist">{{ .Artist }}</div>
+                  <div class="genre">{{ .Genre }}</div>
+                  <div class="price">{{ .Price }}$</div>
+                </div>
+            </div>
+            {{ end }}
+          {{ end }}
+      </div>
+    </section>
+
+    <section class="bestsellers">
+      <h2 style="display: flex; justify-content: center;">Bestsellers</h2>
+      <div class="owl-carousel owl-theme">
+        {{ range . }}
+        {{ if gt .PurchasedCount 100 }}
+            <div class="record-container">
+              <div class="record">
+                <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
+                <div class="title">{{ .Title }}</div>
+                <div class="artist">{{ .Artist }}</div>
+                <div class="genre">{{ .Genre }}</div>
+                <div class="price">{{ .Price }}$</div>
+                <div class="price">{{ .PurchasedCount }}</div>
+              </div>
+          </div>
+        {{ end }}
+        {{ end }}
+      </div>
+    </section>
+
+
+    <section class="bestsellers">
+      <h2 style="display: flex; justify-content: center;">Sale</h2>
+      <div class="owl-carousel owl-theme">
+          {{ range . }}
+            {{ if eq .Sale true }}
+              <div class="record-container">
+                <div class="record">
+                  <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
+                  <div class="title">{{ .Title }}</div>
+                  <div class="artist">{{ .Artist }}</div>
+                  <div class="genre">{{ .Genre }}</div>
+                  <div class="price">{{ .Price }}$</div>
+                </div>
+            </div>
+            {{ end }}
+          {{ end }}
+      </div>
+    </section>
+
+
+    <section class="bestsellers">
+      <h2 style="display: flex; justify-content: center;">Pre-Order</h2>
+      <div class="owl-carousel owl-theme">
+          {{ range . }}
+            {{ if eq .PreOrder true }}
+              <div class="record-container">
+                <div class="record">
+                  <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
+                  <div class="title">{{ .Title }}</div>
+                  <div class="artist">{{ .Artist }}</div>
+                  <div class="genre">{{ .Genre }}</div>
+                  <div class="price">{{ .Price }}$</div>
+                </div>
+            </div>
+            {{ end }}
+          {{ end }}
+      </div>
+    </section>
+
+
+
+      <script>
       const images = document.querySelectorAll("img[src='/img/vinyl.svg']");
     
       images.forEach(img => {
         img.style.filter = `hue-rotate(${Math.floor(Math.random() * 360)}deg)`;
       });
+
+      $('.owl-carousel').owlCarousel({
+        loop: false,
+        margin: 50,
+        nav: true,
+        // navText: [
+        //   '<span class="custom-arrow "></span>', 
+        //   '<span class="custom-arrow "></span>' 
+        // ],
+        responsive: {
+          0: {
+            items: 1
+          },
+          600: {
+            items: 3
+          },
+          1000: {
+            items: 3
+          }
+        }
+      })
+
+
     </script>
   </body>
 </html>
