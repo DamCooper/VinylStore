@@ -1,4 +1,13 @@
 # VinylStore
+REPORT 3
+
+Myrzabekov Farkhat: Implemented functionality to login and logout for users. Also added sessions table to db to keep logged users in their accounts using "github.com/gorilla/sessions" library. 
+You can try logging in to website using "user" as login and as password.
+
+Nashkenova Ingkar: Added a function that adds a record to the wishlist for the currently logged in user. It starts by getting the session ID from the session cookie of the current request and uses the session ID to retrieve the user object for the current session then insert a new wishlist item into the database using the user's ID and the record ID obtained from the request form data. 
+For now wishlist can be seen only in database table, not in website UI.
+
+
 REPORT 2
 Myrzabekov Farkhat: I have added 2 new fieilds to the records database such as sale and preorder and worked on website design by adding 3d model iframe;
 
