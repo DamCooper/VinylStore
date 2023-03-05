@@ -1,0 +1,85 @@
+.record {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 50px;
+  }
+  
+  .img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover;
+    margin-bottom: 20px;
+  }
+  
+  .title {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .artist {
+    font-size: 24px;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .genre {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  
+  .price {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .rating {
+    font-size: 36px;
+    color: #f1c40f;
+    margin-bottom: 10px;
+  }
+  
+  .rating-count,
+  .purchased-count {
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .rating-input {
+    margin-top: 20px;
+  }
+  
+  label {
+    font-size: 24px;
+    margin-right: 10px;
+  }
+  
+  select {
+    font-size: 24px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  button[type="submit"] {
+    font-size: 24px;
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #2980b9;
+  }
+  

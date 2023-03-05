@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Record Details</title>
+  <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/record.css">
+</head>
+<body>
+    <div class="record">
+        <img class="img" src="/img/{{.ImagePath}}" alt="{{.Title}} by {{.Artist}}">
+        <div class="title">{{.Title}}</div>
+        <div class="artist">{{.Artist}}</div>
+        <div class="genre">{{.Genre}}</div>
+        <div class="price">{{.Price}}$</div>
+        <div class="rating" data-rating="{{.Rating}}"></div>
+        <div class="rating-count">{{.RatingCount}} ratings</div>
+        <div class="purchased-count">{{.PurchasedCount}} purchased</div>
+         <form method="POST" action="/record/add-rating">
+          <input type="hidden" name="id" value="{{ .ID }}">
+          <div class="rating-input">
+            <label for="rating">Add your rating:</label>
+            <select name="rating" id="rating">
+              <option value="5">5 stars</option>
+              <option value="4">4 stars</option>
+              <option value="3">3 stars</option>
+              <option value="2">2 stars</option>
+              <option value="1">1 star</option>
+            </select>
+          </div>
+          <button type="submit">Submit</button>
+        </form>
+      </div>
+      
+</body>

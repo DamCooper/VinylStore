@@ -8,21 +8,37 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
     </head>
   <body>
 
     <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
     <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe>
       {{ if eq .Email "false" }}
-        <form action="/login" method="POST">
-          <label for="email">Email:</label>
-          <input type="text" id="email" name="email" required><br>
-      
-          <label for="password">Password:</label>
-          <input type="password" id="password" name="password" required><br>
-      
-          <input type="submit" value="Login">
-        </form>
+      <div style="display: flex; justify-content: center; gap: 10em;">
+        <div>
+          <form action="/login" method="POST">
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email" required><br>
+        
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+        
+            <input type="submit" value="Login">
+          </form>
+        </div>
+        <div>
+          <form action="/register" method="POST">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+          
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+          
+            <input type="submit" value="Register">
+          </form>
+        </div>
+      </div>
       {{ else }}
       <form action="/logout" method="POST">
           <p>Welcome {{ .Email }}!</p>
@@ -43,6 +59,7 @@
                   <div class="artist">{{ .Artist }}</div>
                   <div class="genre">{{ .Genre }}</div>
                   <div class="price">{{ .Price }}$</div>
+                  <div class="rating" data-rating="{{ .Rating }}"></div>
                   {{ if ne $.Email "false" }}
                     <form action="/wishlist" method="POST">
                       <input type="hidden" name="record_id" value="{{ .ID }}">
@@ -61,16 +78,24 @@
       <div class="owl-carousel owl-theme">
         {{ range .Records }}
         {{ if gt .PurchasedCount 100 }}
-            <div class="record-container">
-              <div class="record">
+        <form method="POST" action="/record">
+          <input type="hidden" name="id" value="{{ .ID }}">
+          <div class="record-container">
+            <div class="record">
+
+            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
                 <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
                 <div class="title">{{ .Title }}</div>
                 <div class="artist">{{ .Artist }}</div>
                 <div class="genre">{{ .Genre }}</div>
                 <div class="price">{{ .Price }}$</div>
-                <div class="price">{{ .PurchasedCount }}</div>
-              </div>
+                <div class="rating" data-rating="{{ .Rating }}"></div>
+            </button>
           </div>
+
+          </div>
+        </form>
+        
         {{ end }}
         {{ end }}
       </div>
@@ -89,6 +114,7 @@
                   <div class="artist">{{ .Artist }}</div>
                   <div class="genre">{{ .Genre }}</div>
                   <div class="price">{{ .Price }}$</div>
+                  <div class="rating" data-rating="{{ .Rating }}"></div>
                 </div>
             </div>
             {{ end }}
@@ -109,6 +135,7 @@
                   <div class="artist">{{ .Artist }}</div>
                   <div class="genre">{{ .Genre }}</div>
                   <div class="price">{{ .Price }}$</div>
+                  <div class="rating" data-rating="{{ .Rating }}"></div>
                 </div>
             </div>
             {{ end }}
@@ -146,6 +173,24 @@
         }
       })
 
+      var ratings = document.querySelectorAll(".rating");
+
+      ratings.forEach(function(rating) {
+        var ratingValue = rating.getAttribute("data-rating");
+        
+        ratingValue = Math.round(parseFloat(ratingValue) * 2) / 2;
+        console.log(ratingValue); 
+
+        var starsHtml = "";
+        for (var i = 0; i < 5; i++) {
+          if (i < ratingValue) {
+            starsHtml += "<span class='fa fa-star checked'></span>";
+          } else {
+            starsHtml += "<span class='fa fa-star'></span>";
+          }
+        }
+        rating.innerHTML = starsHtml;
+      });
 
     </script>
   </body>

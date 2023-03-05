@@ -25,6 +25,9 @@ type Record struct {
 	Sale           bool
 	PreOrder       bool
 	PurchasedCount int
+	Rating         float64
+	RatingCount    float64
+	RatingTotal    float64
 }
 
 type User struct {
@@ -257,6 +260,93 @@ func addToWishlist(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	email := r.FormValue("email")
+	password := r.FormValue("password")
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("INSERT INTO users (email, password) VALUES (?, ?)")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(email, password)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusFound)
+}
+
+func getRecordById(id string) (*Record, error) {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	var record Record
+	err = db.QueryRow("SELECT id, title, artist, genre, price, image_path, new_item, PurchasedCount, Sale, PreOrder, rating, rating_count FROM records WHERE id = ?", id).Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.NewItem, &record.PurchasedCount, &record.Sale, &record.PreOrder, &record.Rating, &record.RatingCount)
+	if err != nil {
+		return nil, err
+	}
+
+	return &record, nil
+}
+
+func viewRecord(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	id := r.FormValue("id")
+	if id == "" {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	record, err := getRecordById(id)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/record.tmpl")
+	if err != nil {
+		http.Error(w, "Internal Server Errorzz", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, record)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
@@ -312,7 +402,10 @@ func main() {
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("public/img"))))
 
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/record", viewRecord)
+	// http.HandleFunc("/record/add-rating", addRating)
 
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
@@ -342,7 +435,7 @@ func queryRecords(db *sql.DB, sort string) ([]Record, error) {
 	var records []Record
 	for rows.Next() {
 		var r Record
-		err := rows.Scan(&r.ID, &r.Title, &r.Artist, &r.Genre, &r.Price, &r.ImagePath, &r.NewItem, &r.PurchasedCount, &r.Sale, &r.PreOrder)
+		err := rows.Scan(&r.ID, &r.Title, &r.Artist, &r.Genre, &r.Price, &r.ImagePath, &r.NewItem, &r.PurchasedCount, &r.Sale, &r.PreOrder, &r.Rating, &r.RatingCount, &r.RatingTotal)
 		if err != nil {
 			return nil, err
 		}
