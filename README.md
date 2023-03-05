@@ -1,4 +1,8 @@
 # VinylStore
+REPORT 4
+Myrzabekov Farkhat: Added registration to users. 
+Nashkenova Ingkar: Added rating system to store.
+
 REPORT 3
 
 Myrzabekov Farkhat: Implemented functionality to login and logout for users. Also added sessions table to db to keep logged users in their accounts using "github.com/gorilla/sessions" library. 
