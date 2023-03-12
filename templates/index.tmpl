@@ -13,7 +13,7 @@
   <body>
 
     <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
-    <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe>
+    <!-- <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe> -->
       {{ if eq .Email "false" }}
       <div style="display: flex; justify-content: center; gap: 10em;">
         <div>
@@ -25,6 +25,7 @@
             <input type="password" id="password" name="password" required><br>
         
             <input type="submit" value="Login">
+            
           </form>
         </div>
         <div>
@@ -40,34 +41,37 @@
         </div>
       </div>
       {{ else }}
-      <form action="/logout" method="POST">
+      <form class="center-form" action="/logout" method="POST">
           <p>Welcome {{ .Email }}!</p>
           <input type="submit" value="Logout">
         </form>
+        <a class="center-form" href="/wishlist"><input type="submit" value="My Wishlist"></a>
       {{ end }}
+      <a class="center-form" href="/allRecords"><input type="submit" value="Explore all records"></a>
+      <a class="center-form" style="margin-bottom: 20px;" href="/addRecord"><input type="submit" value="Add new record"></a>
 
 
     <section class="new-items">
       <h2 style="display: flex; justify-content: center;">New Items</h2>
       <div class="owl-carousel owl-theme">
           {{ range .Records }}
-            {{ if eq .NewItem true }}
-              <div class="record-container">
-                <div class="record">
-                  <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
-                  <div class="title">{{ .Title }}</div>
-                  <div class="artist">{{ .Artist }}</div>
-                  <div class="genre">{{ .Genre }}</div>
-                  <div class="price">{{ .Price }}$</div>
-                  <div class="rating" data-rating="{{ .Rating }}"></div>
-                  {{ if ne $.Email "false" }}
-                    <form action="/wishlist" method="POST">
-                      <input type="hidden" name="record_id" value="{{ .ID }}">
-                      <input type="submit" value="Add to wishlist">
-                    </form>
-                  {{ end }}
-                </div>
-            </div>
+              {{ if eq .NewItem true }}
+              <form method="POST" action="/record">
+                <input type="hidden" name="id" value="{{ .ID }}">
+                <div class="record-container">
+                  <div class="record">
+            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+
+                    <img class="img" style="width: 100%;" src="/img/{{.ImagePath}}" alt="{{.Title}} by {{.Artist}}">
+                    <div class="title">{{ .Title }}</div>
+                    <div class="artist">{{ .Artist }}</div>
+                    <div class="genre">{{ .Genre }}</div>
+                    <div class="price">{{ .Price }}$</div>
+                    <div class="rating" data-rating="{{ .Rating }}"></div>
+                    </button>
+                  </div>
+              </div>
+          </form>
             {{ end }}
           {{ end }}
       </div>
@@ -77,7 +81,7 @@
       <h2 style="display: flex; justify-content: center;">Bestsellers</h2>
       <div class="owl-carousel owl-theme">
         {{ range .Records }}
-        {{ if gt .PurchasedCount 100 }}
+        {{ if gt .PurchasedCount 51 }}
         <form method="POST" action="/record">
           <input type="hidden" name="id" value="{{ .ID }}">
           <div class="record-container">
@@ -107,16 +111,22 @@
       <div class="owl-carousel owl-theme">
           {{ range .Records }}
             {{ if eq .Sale true }}
+            <form method="POST" action="/record">
+              <input type="hidden" name="id" value="{{ .ID }}">
               <div class="record-container">
                 <div class="record">
+            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+                  
                   <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
                   <div class="title">{{ .Title }}</div>
                   <div class="artist">{{ .Artist }}</div>
                   <div class="genre">{{ .Genre }}</div>
                   <div class="price">{{ .Price }}$</div>
                   <div class="rating" data-rating="{{ .Rating }}"></div>
+                  </button>
                 </div>
             </div>
+            </form>
             {{ end }}
           {{ end }}
       </div>
@@ -128,16 +138,22 @@
       <div class="owl-carousel owl-theme">
           {{ range .Records }}
             {{ if eq .PreOrder true }}
+            <form method="POST" action="/record">
+              <input type="hidden" name="id" value="{{ .ID }}">
               <div class="record-container">
                 <div class="record">
+            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+
                   <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
                   <div class="title">{{ .Title }}</div>
                   <div class="artist">{{ .Artist }}</div>
                   <div class="genre">{{ .Genre }}</div>
                   <div class="price">{{ .Price }}$</div>
                   <div class="rating" data-rating="{{ .Rating }}"></div>
+                  </button>
                 </div>
             </div>
+            </form>
             {{ end }}
           {{ end }}
       </div>
@@ -178,8 +194,7 @@
       ratings.forEach(function(rating) {
         var ratingValue = rating.getAttribute("data-rating");
         
-        ratingValue = Math.round(parseFloat(ratingValue) * 2) / 2;
-        console.log(ratingValue); 
+        ratingValue = Math.round(ratingValue);
 
         var starsHtml = "";
         for (var i = 0; i < 5; i++) {

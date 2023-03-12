@@ -6,7 +6,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -28,6 +32,7 @@ type Record struct {
 	Rating         float64
 	RatingCount    float64
 	RatingTotal    float64
+	Email          string
 }
 
 type User struct {
@@ -184,14 +189,57 @@ func getUserBySessionId(sessionId string) (*User, error) {
 	return &user, nil
 }
 
-func searchRecords(query string) ([]Record, error) {
+func searchRecords(query string, price_filter string, rating_filter string) ([]Record, error) {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT title, artist, genre, price, image_path, PurchasedCount FROM records WHERE title LIKE ? OR artist LIKE ? OR genre LIKE ?", "%"+query+"%", "%"+query+"%", "%"+query+"%")
+	// PurchasedCount int
+	// Rating         float64
+	// RatingCount    float64
+	// RatingTotal    float64
+
+	sqlQuery := "SELECT id, title, artist, genre, price, image_path, PurchasedCount, Rating FROM records WHERE (title LIKE ? OR artist LIKE ? OR genre LIKE ?)"
+	var args []interface{}
+	args = append(args, "%"+query+"%", "%"+query+"%", "%"+query+"%")
+
+	if price_filter != "" {
+		switch price_filter {
+		case "asc":
+			sqlQuery += " ORDER BY price ASC"
+		case "desc":
+			sqlQuery += " ORDER BY price DESC"
+		case "0-10":
+			sqlQuery += " AND price >= 0 AND price <= 10"
+		case "10-20":
+			sqlQuery += " AND price >= 10 AND price <= 20"
+		case "20-30":
+			sqlQuery += " AND price >= 20 AND price <= 30"
+		}
+	}
+
+	if rating_filter != "" {
+		switch rating_filter {
+		case "asc":
+			sqlQuery += " ORDER BY rating ASC"
+		case "desc":
+			sqlQuery += " ORDER BY rating DESC"
+		case "1":
+			sqlQuery += " AND rating >= 0 AND rating < 1.49"
+		case "2":
+			sqlQuery += " AND rating >= 1.5 AND rating < 2.49"
+		case "3":
+			sqlQuery += " AND rating >= 2.5 AND rating < 3.49"
+		case "4":
+			sqlQuery += " AND rating >= 3.5 AND rating < 4.49"
+		case "5":
+			sqlQuery += " AND rating >= 4.5"
+		}
+	}
+
+	rows, err := db.Query(sqlQuery, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +248,7 @@ func searchRecords(query string) ([]Record, error) {
 	var records []Record
 	for rows.Next() {
 		var record Record
-		if err := rows.Scan(&record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.PurchasedCount); err != nil {
+		if err := rows.Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.PurchasedCount, &record.Rating); err != nil {
 			return nil, err
 		}
 		records = append(records, record)
@@ -212,21 +260,22 @@ func searchRecords(query string) ([]Record, error) {
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		r.ParseForm()
-		query := r.FormValue("query")
+		query := r.FormValue("q")
 
-		records, err := searchRecords(query)
+		records, err := searchRecords(query, "", "")
 		if err != nil {
 			http.Error(w, "1Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		t, err := template.ParseFiles("templates/index.tmpl")
+		t, err := template.ParseFiles("templates/allrecords.tmpl")
 		if err != nil {
 			http.Error(w, "2Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		t.Execute(w, records)
+
 	}
 }
 
@@ -258,6 +307,7 @@ func addToWishlist(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	http.Redirect(w, r, "/wishlist", http.StatusFound)
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
@@ -306,7 +356,7 @@ func getRecordById(id string) (*Record, error) {
 	defer db.Close()
 
 	var record Record
-	err = db.QueryRow("SELECT id, title, artist, genre, price, image_path, new_item, PurchasedCount, Sale, PreOrder, rating, rating_count FROM records WHERE id = ?", id).Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.NewItem, &record.PurchasedCount, &record.Sale, &record.PreOrder, &record.Rating, &record.RatingCount)
+	err = db.QueryRow("SELECT id, title, artist, genre, price, image_path, new_item, PurchasedCount, Sale, PreOrder, rating, rating_count, rating_total FROM records WHERE id = ?", id).Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.NewItem, &record.PurchasedCount, &record.Sale, &record.PreOrder, &record.Rating, &record.RatingCount, &record.RatingTotal)
 	if err != nil {
 		return nil, err
 	}
@@ -333,6 +383,20 @@ func viewRecord(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
+	record.Email = "false"
+	//record.Rating = record.RatingTotal / record.RatingCount
+
+	sessionCookie, err := r.Cookie("session_id")
+	if err == nil {
+		session := &Session{ID: sessionCookie.Value}
+		user, err := getUserBySessionId(session.ID)
+		if err == nil {
+			if user != nil {
+				print(user.Email)
+				record.Email = user.Email
+			}
+		}
+	}
 
 	tmpl, err := template.ParseFiles("templates/record.tmpl")
 	if err != nil {
@@ -347,31 +411,199 @@ func viewRecord(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
+func addRating(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	id := r.FormValue("id")
+	ratingStr := r.FormValue("rating")
+
+	rating, err := strconv.Atoi(ratingStr)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	db.QueryRow("UPDATE records SET rating_total = rating_total + ?, rating_count = rating_count + 1 WHERE id = ?", rating, id).Scan()
+	db.Exec("UPDATE records SET rating = CASE WHEN rating_count > 0 THEN rating_total / rating_count ELSE 0 END WHERE id = ?", id)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func viewWishlist(w http.ResponseWriter, r *http.Request) {
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	session := &Session{ID: sessionCookie.Value}
+	user, err := getUserBySessionId(session.ID)
+	if err != nil || user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT r.id, r.title, r.artist, r.price FROM wishlist w JOIN records r ON w.record_id=r.id WHERE w.user_id=?", user.ID)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+	var records []Record
+	for rows.Next() {
+		var record Record
+		err = rows.Scan(&record.ID, &record.Title, &record.Artist, &record.Price)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		records = append(records, record)
+		print("\n=====", record.Title, "\n")
+	}
+	err = rows.Err()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	tmpl, err := template.ParseFiles("templates/wishlist.tmpl")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, records)
+
+}
+
+func allRecords(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
 
-	http.HandleFunc("/search", searchHandler)
-	http.HandleFunc("/wishlist", addToWishlist)
+	sort := r.URL.Query().Get("sort")
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		sort := r.URL.Query().Get("sort")
-		records, err := queryRecords(db, sort)
+	records, err := queryRecords(db, sort)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+		query := r.FormValue("q")
+		price_filter := r.FormValue("price-filter")
+		rating_filter := r.FormValue("rating-filter")
+
+		records, err = searchRecords(query, price_filter, rating_filter)
+		if err != nil {
+			http.Error(w, "1Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+	}
+
+	data := struct {
+		Records []Record
+		Email   string
+	}{
+		Records: records,
+		Email:   "false",
+	}
+
+	sessionCookie, err := r.Cookie("session_id")
+	if err == nil {
+		session := &Session{ID: sessionCookie.Value}
+		user, err := getUserBySessionId(session.ID)
+		if err == nil {
+			if user != nil {
+				print(user.Email)
+				data.Email = user.Email
+			}
+		}
+	}
+
+	s := "templates/index.tmpl"
+	if strings.Contains(r.URL.Path, "allRecords") {
+		s = "templates/allrecords.tmpl"
+	}
+
+	tmpl, err := template.ParseFiles(s)
+
+	if err != nil {
+		http.Error(w, "Internal Server Errorssssssss", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+}
+
+func addRecord(record Record) error {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("INSERT INTO records(title, artist, genre, price, rating, image_path, rating_count) VALUES (?, ?, ?, ?, ?, ?, 0)")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(record.Title, record.Artist, record.Genre, record.Price, record.Rating, record.ImagePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func addRecordHandler(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == "POST" {
+
+		err := r.ParseMultipartForm(32 << 20) // 32 MB
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		data := struct {
-			Records []Record
-			Email   string
-		}{
-			Records: records,
-			Email:   "false",
+		title := r.FormValue("title")
+		artist := r.FormValue("artist")
+		genre := r.FormValue("genre")
+		price, err := strconv.ParseFloat(r.FormValue("price"), 64)
+		if err != nil {
+			http.Error(w, "Invalid price", http.StatusBadRequest)
+			return
 		}
+		image, handler, err := r.FormFile("image")
+		if err != nil {
+			http.Error(w, "Error uploading image", http.StatusBadRequest)
+			return
+		}
+		defer image.Close()
+		fileName := ""
 
 		sessionCookie, err := r.Cookie("session_id")
 		if err == nil {
@@ -379,24 +611,62 @@ func main() {
 			user, err := getUserBySessionId(session.ID)
 			if err == nil {
 				if user != nil {
-					print(user.Email)
-					data.Email = user.Email
+					timestamp := time.Now().Format("20060102150405")
+					fileName = strconv.Itoa(user.ID) + "_" + timestamp + "_" + handler.Filename
 				}
 			}
 		}
 
-		tmpl, err := template.ParseFiles("templates/index.tmpl")
+		out, err := os.Create("./public/img/" + fileName)
 		if err != nil {
-			http.Error(w, "Internal Server Errorssssssss", http.StatusInternalServerError)
+			http.Error(w, "Error saving image file", http.StatusInternalServerError)
+			return
+		}
+		defer out.Close()
+		_, err = io.Copy(out, image)
+		if err != nil {
+			http.Error(w, "Error saving image file", http.StatusInternalServerError)
 			return
 		}
 
-		err = tmpl.Execute(w, data)
-		if err != nil {
-			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		record := Record{Title: title, Artist: artist, Genre: genre, Price: price, ImagePath: fileName, PurchasedCount: 0, Rating: 0}
+		if err := addRecord(record); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	})
+		fmt.Fprint(w, "Record added successfully!")
+	} else {
+		tmpl, err := template.ParseFiles("templates/addrecord.tmpl")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err := tmpl.Execute(w, ""); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	}
+}
+
+func main() {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+	//db.Exec("DELETE FROM records WHERE id = (SELECT MAX(id) FROM records)")
+
+	// for i := 0; i < 100; i++ {
+	// 	path := fmt.Sprintf("/record/%d", i)
+	// 	http.HandleFunc(path, viewRecord)
+	// }
+	http.HandleFunc("/search", searchHandler)
+	http.HandleFunc("/addToWishlist", addToWishlist)
+	http.HandleFunc("/wishlist", viewWishlist)
+	http.HandleFunc("/allRecords", allRecords)
+	http.HandleFunc("/addRecord", addRecordHandler)
+
+	http.HandleFunc("/", allRecords)
 
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("public/css"))))
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("public/img"))))
@@ -405,7 +675,7 @@ func main() {
 	http.HandleFunc("/register", registerHandler)
 	http.HandleFunc("/logout", logoutHandler)
 	http.HandleFunc("/record", viewRecord)
-	// http.HandleFunc("/record/add-rating", addRating)
+	http.HandleFunc("/record/add-rating", addRating)
 
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {

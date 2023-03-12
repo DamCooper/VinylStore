@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>My Wishlist</title>
+    <style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		th, td {
+			text-align: left;
+			padding: 8px;
+			border-bottom: 1px solid #ddd;
+		}
+		tr:hover {
+			background-color: #f5f5f5;
+		}
+		th {
+			background-color: #4CAF50;
+			color: white;
+		}
+    </style>
+</head>
+<body>
+	<h1>My Wishlist</h1>
+	{{if .}}
+		<table>
+			<tr>
+				<th>Title</th>
+				<th>Artist</th>
+				<th>Price</th>
+			</tr>
+			{{range .}}
+			<tr>
+				<td>{{.Title}}</td>
+				<td>{{.Artist}}</td>
+				<td>{{.Price}}</td>
+			</tr>
+			{{end}}
+		</table>
+	{{else}}
+		<p>You have no records in your wishlist.</p>
+	{{end}}
+</body>
+</html>

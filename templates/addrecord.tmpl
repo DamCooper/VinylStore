@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Add New Vinyl Record</title>
+    <style>
+      body {
+        background-color: #222;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        padding: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      input[type="text"],
+      input[type="file"],
+      select {
+        background-color: #444;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        font-size: 16px;
+        margin-bottom: 20px;
+        padding: 10px;
+        width: 100%;
+        max-width: 50ch;
+      }
+
+      input[type="submit"] {
+        background-color: #06f;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 10px;
+      }
+
+      input[type="submit"]:hover {
+        background-color: #08f;
+      }
+
+    </style>
+  </head>
+  <body>
+
+    <form style="display: flex; align-items: center; flex-direction: column;" method="post" action="/addRecord" enctype="multipart/form-data">
+        <h1>Add New Vinyl Record</h1>
+        <label for="title">Title:</label>
+        <input type="text" name="title" required>
+      
+        <label for="artist">Artist:</label>
+        <input type="text" name="artist" required>
+      
+        <label for="genre">Genre:</label>
+        <input type="text" name="genre" required>
+      
+        <label for="price">Price:</label>
+        <input type="text" name="price" required>
+      
+        <label for="image">Image:</label>
+        <input type="file" name="image" accept="image/*" required>
+      
+        <input type="submit" value="Add Record">
+      </form>      
+
+  </body>
+</html>

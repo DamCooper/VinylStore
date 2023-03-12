@@ -16,12 +16,18 @@
         <div class="rating" data-rating="{{.Rating}}"></div>
         <div class="rating-count">{{.RatingCount}} ratings</div>
         <div class="purchased-count">{{.PurchasedCount}} purchased</div>
+        {{ if ne .Email "false" }}
+        <form action="/addToWishlist" method="POST">
+          <input type="hidden" name="record_id" value="{{ .ID }}">
+          <input type="submit" value="Add to wishlist">
+        </form>
+      {{ end }}
          <form method="POST" action="/record/add-rating">
           <input type="hidden" name="id" value="{{ .ID }}">
           <div class="rating-input">
             <label for="rating">Add your rating:</label>
             <select name="rating" id="rating">
-              <option value="5">5 stars</option>
+              <option value="5" selected>5 stars</option>
               <option value="4">4 stars</option>
               <option value="3">3 stars</option>
               <option value="2">2 stars</option>
@@ -31,5 +37,23 @@
           <button type="submit">Submit</button>
         </form>
       </div>
-      
+      <script>
+          var ratings = document.querySelectorAll(".rating");
+
+ratings.forEach(function(rating) {
+  var ratingValue = rating.getAttribute("data-rating");
+  
+  ratingValue = Math.round(ratingValue);
+
+  var starsHtml = "";
+  for (var i = 0; i < 5; i++) {
+    if (i < ratingValue) {
+      starsHtml += "<span class='fa fa-star checked'></span>";
+    } else {
+      starsHtml += "<span class='fa fa-star'></span>";
+    }
+  }
+  rating.innerHTML = starsHtml;
+});
+      </script>
 </body>
