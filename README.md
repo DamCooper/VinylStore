@@ -1,4 +1,19 @@
 # VinylStore
+REPORT 5
+Myrzabekov Farkhat:  
+go template to display a user's wishlist using a table and go handler to pass specific logged in users wishlist for template
+HTML page for adding a new vinyl record to a database
+parsing the form data for the new record's title, artist, genre, and price also gets the image file
+
+Nashkenova Ingkar:
+redisign of searching and filtering
+two forms on a web page, one for searching and one for filtering records based on price and rating
+also go handler to apply filters and search to display data based on queries.
+processing the uploaded image for new added record by creating a unique filename, saving the image file to the server
+
+worked together on:
+rating system is complete now, users can rate vinyl records and display is working fine.
+
 REPORT 4
 Myrzabekov Farkhat: Added registration to users. 
 Nashkenova Ingkar: Added rating system to store.
