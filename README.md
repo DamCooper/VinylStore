@@ -14,6 +14,8 @@ processing the uploaded image for new added record by creating a unique filename
 worked together on:
 rating system is complete now, users can rate vinyl records and display is working fine.
 
+PS. USER SHOULD BE LOGGED IN TO ADD NEW RECORD ===
+
 REPORT 4
 Myrzabekov Farkhat: Added registration to users. 
 Nashkenova Ingkar: Added rating system to store.
