@@ -52,7 +52,7 @@ form select {
   <body>
 
     <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
-      {{ if eq .Email "false" }}
+      {{ if eq .User.Email "false" }}
       <div style="display: flex; justify-content: center; gap: 10em;">
         <div>
           <form action="/login" method="POST">
@@ -80,7 +80,7 @@ form select {
       </div>
       {{ else }}
       <form class="center-form" action="/logout" method="POST">
-          <p>Welcome {{ .Email }}!</p>
+          <p>Welcome {{ .User.Email }}!</p>
           <input type="submit" value="Logout">
         </form>
         <a class="center-form" href="/wishlist"><input type="submit" value="My Wishlist"></a>

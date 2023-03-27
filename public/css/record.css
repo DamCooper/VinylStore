@@ -1,44 +1,137 @@
-.record {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin: 50px;
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
   }
-  
-  .img {
-    width: 300px;
-    height: 300px;
-    object-fit: cover;
-    margin-bottom: 20px;
+
+  .record {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
   }
-  
-  .title {
-    font-size: 36px;
-    font-weight: bold;
-    text-align: center;
+
+  .record img {
+    height: auto;
     margin-bottom: 10px;
+    max-width: 300px;
+    max-height: 300px;
   }
-  
-  .artist {
+
+  .record .title {
     font-size: 24px;
-    font-style: italic;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  .genre {
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 10px;
-  }
-  
-  .price {
-    font-size: 36px;
     font-weight: bold;
-    text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
   }
-  
+
+  .record .artist {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .record .genre {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .record .price {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .record .rating {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+
+  .record .rating-count,
+  .record .purchased-count {
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+
+  .record form {
+    margin-bottom: 10px;
+  }
+
+  .record form input[type="submit"],
+  .record form button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .record form input[type="submit"]:hover,
+  .record form button[type="submit"]:hover {
+    background-color: #0069d9;
+  }
+
+  .record form input[type="hidden"] {
+    display: none;
+  }
+
+  .record form .rating-input {
+    margin-bottom: 10px;
+  }
+
+  .record form .rating-input label {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .record form .rating-input select {
+    margin-left: 10px;
+    font-size: 16px;
+  }
+
+  .record form .rating-input select option {
+    font-size: 16px;
+  }
+
+  .record form .rating-input button[type="submit"] {
+    margin-top: 10px;
+  }
+
+  .record form .rating-input button[type="submit"]:hover {
+    background-color: #007bff;
+  }
+
+  .record form input[type="text"],
+  .record form textarea {
+    width: 95%;
+    padding: 8px;
+    font-size: 16px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  .record form textarea {
+    height: 100px;
+  }
+
+  .record form button[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  .record form button[type="submit"]:hover {
+    background-color: #0069d9;
+  }
+
   .rating {
     font-size: 36px;
       margin-bottom: 10px;
@@ -46,55 +139,21 @@
   .rating .checked {
     color: #f1c40f;
   }
-  
-  .rating-count,
-  .purchased-count {
-    font-size: 24px;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .rating-input {
-    margin-top: 20px;
-  }
-  
-  label {
-    font-size: 24px;
-    margin-right: 10px;
-  }
-  
-  select {
-    font-size: 24px;
-    padding: 5px;
-    border-radius: 5px;
+
+  .comment {
     border: 1px solid #ccc;
-  }
-  
-  button[type="submit"] {
-    font-size: 24px;
+    border-radius: 5px;
     padding: 10px;
-    border-radius: 5px;
-    border: none;
-    background-color: #3498db;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+    margin-bottom: 10px;
+    background-color: #f2f2f2;
   }
-  
-  button[type="submit"]:hover {
-    background-color: #2980b9;
+
+  .comment .author {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
   }
-  input[type="submit"] {
-    padding: 10px 15px;
-    background-color: #4CAF50;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.2rem;
-    margin-top: 10px;
+
+  .comment .body {
+    font-size: 16px;
   }
-  
-  input[type="submit"]:hover {
-    background-color: #3e8e41;
-  }  

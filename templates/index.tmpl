@@ -11,10 +11,10 @@
     <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
     </head>
   <body>
-
+<!-- {{.User.Email}} -->
     <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
     <!-- <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe> -->
-      {{ if eq .Email "false" }}
+    {{ if eq .User.Email "false" }}
       <div style="display: flex; justify-content: center; gap: 10em;">
         <div>
           <form action="/login" method="POST">
@@ -42,14 +42,15 @@
       </div>
       {{ else }}
       <form class="center-form" action="/logout" method="POST">
-          <p>Welcome {{ .Email }}!</p>
+          <p>Welcome {{ .User.Email }}!</p>
           <input type="submit" value="Logout">
         </form>
         <a class="center-form" href="/wishlist"><input type="submit" value="My Wishlist"></a>
       {{ end }}
       <a class="center-form" href="/allRecords"><input type="submit" value="Explore all records"></a>
+      {{ if eq .User.Role "admin" }}
       <a class="center-form" style="margin-bottom: 20px;" href="/addRecord"><input type="submit" value="Add new record"></a>
-
+      {{ end }}
 
     <section class="new-items">
       <h2 style="display: flex; justify-content: center;">New Items</h2>

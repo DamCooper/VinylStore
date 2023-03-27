@@ -18,6 +18,13 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type Comment struct {
+	ID       int64
+	RecordID string
+	Author   string
+	Body     string
+}
+
 type Record struct {
 	ID             int
 	Title          string
@@ -33,12 +40,14 @@ type Record struct {
 	RatingCount    float64
 	RatingTotal    float64
 	Email          string
+	Comments       []Comment
 }
 
 type User struct {
 	ID       int
 	Email    string
 	Password string
+	Role     string
 }
 
 type Session struct {
@@ -127,8 +136,6 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	email := r.Form.Get("email")
 	password := r.Form.Get("password")
 	user, err := verifyUser(email, password)
-	print(email)
-	print(password)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -177,7 +184,7 @@ func getUserBySessionId(sessionId string) (*User, error) {
 	defer db.Close()
 
 	var user User
-	err = db.QueryRow("SELECT u.id, u.email, u.password FROM users u INNER JOIN sessions s ON u.id = s.user_id WHERE s.session_id = ?", sessionId).Scan(&user.ID, &user.Email, &user.Password)
+	err = db.QueryRow("SELECT u.id, u.email, u.password, u.role FROM users u INNER JOIN sessions s ON u.id = s.user_id WHERE s.session_id = ?", sessionId).Scan(&user.ID, &user.Email, &user.Password, &user.Role)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -392,11 +399,13 @@ func viewRecord(w http.ResponseWriter, r *http.Request) {
 		user, err := getUserBySessionId(session.ID)
 		if err == nil {
 			if user != nil {
-				print(user.Email)
-				record.Email = user.Email
+				record.Email = user.Role
 			}
 		}
 	}
+	comments, _ := getCommentsByRecordID(id)
+
+	record.Comments = comments
 
 	tmpl, err := template.ParseFiles("templates/record.tmpl")
 	if err != nil {
@@ -474,7 +483,6 @@ func viewWishlist(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		records = append(records, record)
-		print("\n=====", record.Title, "\n")
 	}
 	err = rows.Err()
 	if err != nil {
@@ -522,11 +530,19 @@ func allRecords(w http.ResponseWriter, r *http.Request) {
 
 	data := struct {
 		Records []Record
-		Email   string
+		User    *User
 	}{
 		Records: records,
-		Email:   "false",
+		User:    nil,
 	}
+
+	user := User{
+		ID:       100,
+		Email:    "false",
+		Password: "password",
+		Role:     "false",
+	}
+	data.User = &user
 
 	sessionCookie, err := r.Cookie("session_id")
 	if err == nil {
@@ -534,8 +550,7 @@ func allRecords(w http.ResponseWriter, r *http.Request) {
 		user, err := getUserBySessionId(session.ID)
 		if err == nil {
 			if user != nil {
-				print(user.Email)
-				data.Email = user.Email
+				data.User = user
 			}
 		}
 	}
@@ -581,6 +596,19 @@ func addRecord(record Record) error {
 }
 
 func addRecordHandler(w http.ResponseWriter, r *http.Request) {
+
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	session := &Session{ID: sessionCookie.Value}
+	user, err := getUserBySessionId(session.ID)
+	if err != nil || user == nil || user.Role != "admin" {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
 
 	if r.Method == "POST" {
 
@@ -634,7 +662,6 @@ func addRecordHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, "Record added successfully!")
 	} else {
 		tmpl, err := template.ParseFiles("templates/addrecord.tmpl")
 		if err != nil {
@@ -648,13 +675,174 @@ func addRecordHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func editRecordHandler(w http.ResponseWriter, r *http.Request) {
+
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	session := &Session{ID: sessionCookie.Value}
+	user, err := getUserBySessionId(session.ID)
+	if err != nil || user == nil || user.Role != "admin" {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
+	if r.FormValue("editID") != "" {
+		tmpl, err := template.ParseFiles("templates/editrecord.tmpl")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		editID := r.FormValue("editID")
+
+		record, err := getRecordByID(editID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err := tmpl.Execute(w, record); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+
+	if r.Method == "POST" {
+
+		recordID := r.FormValue("id")
+
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		title := r.FormValue("title")
+		artist := r.FormValue("artist")
+		genre := r.FormValue("genre")
+		priceStr := strings.Replace(r.FormValue("price"), ",", ".", -1)
+		price, err := strconv.ParseFloat(priceStr, 64)
+		if err != nil {
+			http.Error(w, "Invalid price", http.StatusBadRequest)
+			return
+		}
+
+		db, err := sql.Open("sqlite3", "records.db")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+
+		stmt, err := db.Prepare("UPDATE records SET title=?, artist=?, genre=?, price=? WHERE id=?")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+		_, err = stmt.Exec(title, artist, genre, price, recordID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+func getRecordByID(id string) (Record, error) {
+	var record Record
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return record, err
+	}
+	defer db.Close()
+
+	err = db.QueryRow("SELECT id, title, artist, genre, price, image_path FROM records WHERE id = ?", id).Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath)
+	if err != nil {
+		return record, err
+	}
+
+	return record, nil
+}
+func addCommentHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		recordID := r.FormValue("record_id")
+		author := r.FormValue("author")
+		body := r.FormValue("body")
+
+		db, err := sql.Open("sqlite3", "records.db")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+
+		stmt, err := db.Prepare("INSERT INTO comments(record_id, author, comment) VALUES (?, ?, ?)")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+
+		_, err = stmt.Exec(recordID, author, body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	} else {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func getCommentsByRecordID(recordID string) ([]Comment, error) {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id, record_id, author, comment FROM comments WHERE record_id = ?", recordID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	comments := []Comment{}
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(&comment.ID, &comment.RecordID, &comment.Author, &comment.Body)
+		if err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
-	//db.Exec("DELETE FROM records WHERE id = (SELECT MAX(id) FROM records)")
+	// db.Exec("DELETE FROM sessions")
 
 	// for i := 0; i < 100; i++ {
 	// 	path := fmt.Sprintf("/record/%d", i)
@@ -665,6 +853,8 @@ func main() {
 	http.HandleFunc("/wishlist", viewWishlist)
 	http.HandleFunc("/allRecords", allRecords)
 	http.HandleFunc("/addRecord", addRecordHandler)
+	http.HandleFunc("/editRecord", editRecordHandler)
+	http.HandleFunc("/addComment", addCommentHandler)
 
 	http.HandleFunc("/", allRecords)
 

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Add New Vinyl Record</title>
+    <style>
+    body {
+  font-family: Arial, sans-serif;
+  background-color: #f2f2f2;
+}
+  
+ img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    margin: 0 auto;
+  }
+  
+form {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+input[type="text"],
+input[type="file"] {
+  width: 100%;
+  padding: 8px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+input[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type="submit"]:hover {
+  background-color: #0069d9;
+}
+
+input[type="file"]::file-selector-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background-color: #0069d9;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  visibility: hidden;
+  width: 0;
+}
+
+input[type="file"]::before {
+  content: 'Choose Image';
+  visibility: visible;
+  display: inline-block;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input[type="file"]:hover::before {
+  background-color: #0069d9;
+}
+
+input[type="file"]:active::before {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  form {
+    max-width: 100%;
+    padding: 10px;
+  }
+
+  input[type="text"],
+  input[type="file"] {
+    width: 100%;
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <form method="POST" enctype="multipart/form-data" action="/editRecord">
+      <input type="hidden" name="id" value="{{.ID}}">
+      <div>
+        <label>Title:</label>
+        <input type="text" name="title" value="{{.Title}}" required>
+      </div>
+      <div>
+        <label>Artist:</label>
+        <input type="text" name="artist" value="{{.Artist}}" required>
+      </div>
+      <div>
+        <label>Genre:</label>
+        <input type="text" name="genre" value="{{.Genre}}" required>
+      </div>
+      <div>
+        <label>Price:</label>
+        <input type="number" name="price" min="0" step="0.01" value="{{.Price}}" required>
+      </div>
+      <div>
+        <!-- <label>Image:</label>
+        <input type="file" name="image">
+      </div>
+      <div>
+        <img class="record-img" src="/img/{{.ImagePath}}" alt="{{.Title}}">
+      </div> -->
+      <button type="submit">Save</button>
+    </form>
+  </body>
+</html>
