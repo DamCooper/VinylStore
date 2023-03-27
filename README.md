@@ -1,5 +1,12 @@
 # VinylStore
 REPORT 5
+
+![image](https://user-images.githubusercontent.com/91084290/224551630-227ed2d0-2ea4-47cf-b561-309d528b8b4b.png)
+![image](https://user-images.githubusercontent.com/91084290/224551651-451c63ac-b127-4618-bd8e-575a628a89e1.png)
+![image](https://user-images.githubusercontent.com/91084290/224551670-b8740a26-f074-4f3f-883b-72e0a2625774.png)
+![image](https://user-images.githubusercontent.com/91084290/224551688-6c67ec38-9251-4916-83a9-b26ca5220bb1.png)
+
+
 Myrzabekov Farkhat:  
 go template to display a user's wishlist using a table and go handler to pass specific logged in users wishlist for template
 HTML page for adding a new vinyl record to a database
@@ -13,6 +20,9 @@ processing the uploaded image for new added record by creating a unique filename
 
 worked together on:
 rating system is complete now, users can rate vinyl records and display is working fine.
+users can click on records to get full info page and give rating
+
+PS. USER SHOULD BE LOGGED IN TO ADD NEW RECORD ===
 
 REPORT 4
 Myrzabekov Farkhat: Added registration to users. 
