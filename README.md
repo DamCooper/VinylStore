@@ -1,4 +1,20 @@
 # VinylStore
+REPORT 6
+Myrzabekov Farkhat:
+Added item commenting system that handles a POST request sent from a form to add a new comment to a record in the database.
+Also added comment display function for each item.
+![image](https://user-images.githubusercontent.com/91084290/227905068-cce69342-f196-48aa-a93e-ae20b2a47c95.png)
+
+Nashkenova Ingkar:
+Added function to handle requests to edit records.
+Added roles system.
+Now users with no admin role and guests(not authorized users) can't add new items and change it's values.
+
+![image](https://user-images.githubusercontent.com/91084290/227904880-266aee2f-f1f8-4d9d-bdf2-841995124cce.png)
+![image](https://user-images.githubusercontent.com/91084290/227904988-d80071dc-4ab2-4dec-854e-4146bf92a2d8.png)
+
+
+
 REPORT 5
 
 ![image](https://user-images.githubusercontent.com/91084290/224551630-227ed2d0-2ea4-47cf-b561-309d528b8b4b.png)
