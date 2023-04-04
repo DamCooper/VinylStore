@@ -10,24 +10,48 @@
   </style>
 </head>
 <body>
+  <div class="nav">
+    <div class="nav-title"><p><a href="/">PLast'<br>INka</p></a></div>
+    <div class="nav-main">
+        <div class="nav-promo"><p>Save 10% on All Albums <span>Code VINYL 10</span></p></div>
+        <ul>
+            <li><a href="#">New Arrivals</a></li>
+            <li><a href="/allRecords">Catalog</a></li>
+            <li><a href="#">Delivery & Payment</a></li>
+            <li><a href="#">Return & Exchange</a></li>
+            <li><a href="#">For Suppliers</a></li>
+        </ul>
+    </div>
+    <div class="nav-preferences">
+        <div class="nav-lang"><a href="/lang-ru">ru</a>/<a href="/lang-en">en</a></div>
+        <div class="nav-user"><a href="/account">Account</a> <a href="/cart">Cart</a></div>
+    </div>
+</div>
+<div class="wrap">
+  <form class="searchbar">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="search" name="search" placeholder="Type your search term here...">
+      <button type="submit">Search</button>
+  </form>          
+</div>
     <div class="record">
+      <div class="flex">
+        <div class="col" style="margin-right: 230px;">
         <img class="img" src="/img/{{.ImagePath}}" alt="{{ .Title}} by {{ .Artist}}">
-        <div class="title">{{ .Title}}</div>
-        <div class="artist">{{ .Artist}}</div>
-        <div class="genre">{{ .Genre}}</div>
-        <div class="price">{{ .Price}}$</div>
+        <img class="img" style="position: absolute; margin-left: -330px; z-index: -1;" src="/img/black_vinyl.png">
+      </div>
+        <div class="col">
+        <div class="title">{{ .Artist }} - {{ .Title}}</div>
         <div class="rating" data-rating="{{ .Rating}}"></div>
-        <div class="rating-count">{{ .RatingCount}} ratings</div>
-        <div class="purchased-count">{{ .PurchasedCount}} purchased</div>
+        <div class="price">{{ .Price}}$</div>
+        <div class="genre">Genre: {{ .Genre}}</div>
+        <div class="rating-count">Rating Count: {{ .RatingCount}}</div>
+        <div class="purchased-count">Purchased: {{ .PurchasedCount}} times</div>
         {{ if ne  .Email "false" }}
-        <form action="/addToWishlist" method="POST">
-          <input type="hidden" name="record_id" value="{{  .ID }}">
-          <input type="submit" value="Add to wishlist">
-        </form>
-         <form method="POST" action="/record/add-rating">
+        <form class="record-form" method="POST" action="/record/add-rating">
           <input type="hidden" name="id" value="{{  .ID }}">
           <div class="rating-input">
-            <label for="rating">Add your rating:</label>
+            <label for="rating" class="add-rating">Add your rating:</label>
             <select name="rating" id="rating">
               <option value="5" selected>5 stars</option>
               <option value="4">4 stars</option>
@@ -38,42 +62,63 @@
           <button type="submit">Submit</button> 
           </div>
         </form>
+
+        {{ if gt (len .Comments) 1 }}
+        <h2 style="margin-top: 80px;">Recent reviews</h2>
+        {{range .Comments}}
+        <div class="comment">
+          <div class="author">{{.Author}}</div>
+          <div class="body">{{.Body}}</div>
+        </div>
+        {{end}}
+        {{end}}
+        <p style="font-weight: 500; margin-top: 30px;">Leave a comment</p>
+      <form class="record-form" method="POST" action="/addComment">
+        <input type="hidden" name="record_id" value="{{ .ID}}">
+        <label class="add-rating">
+          <input type="text" name="author" required placeholder="  Your name">
+        </label>
+        <br>
+        <label class="add-rating">
+          <textarea name="body" required placeholder="  Comment"></textarea>
+        </label>
+        <br>
+        <button type="submit">Add Comment</button>
+      </form>
+      </div>
+      
+      <div class="col">
+        <form id="wishlist-form" action="/addToWishlist" method="POST">
+          <input type="hidden" name="record_id" value="{{  .ID }}">
+          <input type="submit" style="display: none;">
+          <i class="fas fa-heart" onclick="submitForm()"></i>
+        </form>
+
+      </div>
+      </div>
+<!-- 
         {{ if eq .Email "admin" }}
 
         <form action="/editRecord" method="post">
           <input name="editID" type="hidden" value="{{  .ID }}">
           <input type="submit" value="Edit record">
         </form>
-        {{ end }}
-
-        <h2 style="margin-top: 10px;">Comments section:</h2>
-
-        <form method="POST" action="/addComment">
-          <input type="hidden" name="record_id" value="{{ .ID}}">
-          <label>
-            Your Name:
-            <input type="text" name="author" required>
-          </label>
-          <br>
-          <label>
-            Comment:
-            <textarea name="body" required></textarea>
-          </label>
-          <br>
-          <button type="submit">Add Comment</button>
-        </form>
+        {{ end }} -->
       {{ end }}
-        {{range .Comments}}
-  <div class="comment">
-    <div class="author">{{.Author}}</div>
-    <div class="body">{{.Body}}</div>
-  </div>
-{{end}}
+  
 
         
       </div>
       <script>
+        function submitForm() {
+          var form = document.getElementById("wishlist-form");
+          
+          var submitButton = form.querySelector('input[type="submit"]');
+          submitButton.click();
+        }
           var ratings = document.querySelectorAll(".rating");
+          var title = document.querySelector(".title");
+          title.innerHTML = title.innerHTML.toUpperCase();
 
 ratings.forEach(function(rating) {
   var ratingValue = rating.getAttribute("data-rating");
@@ -92,3 +137,4 @@ ratings.forEach(function(rating) {
 });
       </script>
 </body>
+</html>

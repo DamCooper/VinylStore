@@ -1,159 +1,233 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #f2f2f2;
+  background-image: url('/img/whitebg.jpg');
+  background-size: cover;
   }
 
-  .record {
-    max-width: 800px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+  * {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Space Grotesk', sans-serif;
   }
-
-  .record img {
-    height: auto;
-    margin-bottom: 10px;
-    max-width: 300px;
-    max-height: 300px;
-  }
-
-  .record .title {
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-
-  .record .artist {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-
-  .record .genre {
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-
-  .record .price {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
-
-  .record .rating {
-    font-size: 24px;
-    margin-bottom: 10px;
-  }
-
-  .record .rating-count,
-  .record .purchased-count {
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-
-  .record form {
-    margin-bottom: 10px;
-  }
-
-  .record form input[type="submit"],
-  .record form button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-
-  .record form input[type="submit"]:hover,
-  .record form button[type="submit"]:hover {
-    background-color: #0069d9;
-  }
-
-  .record form input[type="hidden"] {
+  
+  body::-webkit-scrollbar {
     display: none;
   }
-
-  .record form .rating-input {
-    margin-bottom: 10px;
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  body {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
+  
 
-  .record form .rating-input label {
-    font-size: 16px;
+
+
+  .nav {
+    display: flex;
+    width: 100%;
+    border: 1px solid gray;
+    text-align: center;
+    background-color: white;
+  }
+  .nav * {
+    flex-grow: 1;
+  }
+  
+  .nav-title {
+    width: 20%;
+  }
+  
+  .nav-title p {
+    font-size: 2em;
     font-weight: bold;
   }
-
-  .record form .rating-input select {
-    margin-left: 10px;
-    font-size: 16px;
+  .nav-title a {
+    color: initial; text-decoration: none;
   }
-
-  .record form .rating-input select option {
-    font-size: 16px;
+  .nav-main {
+    border: 1px solid gray;
+    display: flex;
+    flex-direction: column;
+    border-bottom: none;
+    border-top: none;
+    width: 100%;
   }
-
-  .record form .rating-input button[type="submit"] {
-    margin-top: 10px;
+  
+  .nav-main ul{
+    display: flex;
+    flex-wrap: nowrap;
+    list-style: none;
+    white-space: nowrap;
+    align-items: center;
+    font-weight: bold;
   }
-
-  .record form .rating-input button[type="submit"]:hover {
-    background-color: #007bff;
+  .nav-main ul a {
+    text-decoration: none;
+    color: black;
   }
-
-  .record form input[type="text"],
-  .record form textarea {
-    width: 95%;
-    padding: 8px;
-    font-size: 16px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+  .nav-promo {
+    padding: 1em;
+    display: flex;
+    background: #e7eaeb;
+    margin: 0;
+    max-height: 1em;
+    overflow: hidden;
+    align-items: center;
+    border-bottom: 1px solid gray;
+  
   }
-
-  .record form textarea {
-    height: 100px;
+  .nav-promo p span {
+    margin-left: 1em;
+    background-color: #b6c5c7;
+    padding: 2px 1em;
+    border: gray solid 1px;
   }
-
-  .record form button[type="submit"] {
-    background-color: #007bff;
-    color: #fff;
+  .nav-preferences {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 1;
+    width: 20%;
+  }
+  .nav-preferences a {
+    color: black;
+    text-decoration: none;
+  }
+  .nav-lang {
+    max-height: 1em;
+    padding: 1em;
+    border-bottom: 1px solid gray;
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+  .nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    width: 100%;
+  }
+  .searchbar {
+    margin: 1em auto;
+    border: gray solid 1px;
+    width: fit-content;
+    height: 2em;
+    display: flex;
+    align-items: center;
+    padding-left: 0.5em;
+    background-color: #e7eaeb;
+  }
+  
+  .searchbar input {
     border: none;
-    padding: 8px 16px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
+    width: 50ch;
+    padding: 0 0.6em;
+    background: #e7eaeb;
   }
-
-  .record form button[type="submit"]:hover {
-    background-color: #0069d9;
-  }
-
-  .rating {
-    font-size: 36px;
-      margin-bottom: 10px;
-  }
-  .rating .checked {
-    color: #f1c40f;
-  }
-
-  .comment {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f2f2f2;
-  }
-
-  .comment .author {
-    font-size: 16px;
+  
+  .searchbar button {
+    border: none;
+    background: none;
+    border-left: gray 1px solid;
+    height: 100%;
+    padding: 0 2em;
     font-weight: bold;
-    margin-bottom: 5px;
+    background-color: #b6c5c7;
   }
 
+  .record .img {
+    height: 500px;
+    width: auto;
+    object-fit: contain; 
+  }
+.flex {
+  display: flex;
+  justify-content: space-around;
+}
+.record {
+  padding: 50px 100px;
+}
+
+.record .title {
+  font-size: 2em;
+  font-weight:500;
+}
+
+.record .rating {
+  margin-bottom: 1em;
+}
+
+.record .price {
+  font-size: 1.2em;
+  font-weight:500;
+  margin-bottom: 2em;
+}
+
+.checked {
+  color: #e9b759;
+}
+
+.genre, .rating-count, .purchased-count, .add-rating {
+  margin: 10px 0;
+  font-weight: 500;
+}
+.fa-heart {
+  font-size: 1.2em;
+  background: #e9b759; 
+  border-radius: 50%; 
+  padding: 5px;
+  color: white;
+  display: flex;
+  position: relative;
+  bottom: -5px;
+  cursor: pointer;
+}
+
+.add-rating input,
+.add-rating textarea {
+  border: 1px solid gray;
+  background: hsl(0, 0%, 100%);
+  padding: 3px 0;
+  margin: 10px 0;
+}
+
+.add-rating input {
+  width: 20ch;
+}
+
+.add-rating textarea {
+  width: 500px;
+  height: 10ch;
+  resize: vertical;
+}
+
+.record-form button[type="submit"] {
+  border: none;
+  background: none;
+  border: gray 1px solid;
+  height: 100%;
+  padding: 0.5em 1em;
+  font-weight: bold;
+  background-color: #b6c5c7;
+}
+
+.comment {
+  margin-top: 20px;
+  border: 1px solid gray;
+  padding: 1em;
+  margin-bottom: 1em;
+  max-width: 500px;
+  background: hsl(195, 9%, 89%);
+  }
+  
+  .comment .author {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+  }
+  
   .comment .body {
-    font-size: 16px;
+  margin-top: 0.5em;
   }
