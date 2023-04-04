@@ -2,167 +2,220 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Vinyl Records for Sale</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Plastinka</title>
+    <link rel="stylesheet" href="/css/index.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-    <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/a9515ed9ed.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/circletype@2.3.0/dist/circletype.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
     </head>
   <body>
 <!-- {{.User.Email}} -->
-    <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
-    <!-- <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe> -->
-    {{ if eq .User.Email "false" }}
-      <div style="display: flex; justify-content: center; gap: 10em;">
-        <div>
-          <form action="/login" method="POST">
-            <label for="email">Email:</label>
-            <input type="text" id="email" name="email" required><br>
-        
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br>
-        
-            <input type="submit" value="Login">
-            
-          </form>
-        </div>
-        <div>
-          <form action="/register" method="POST">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required><br>
-          
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required><br>
-          
-            <input type="submit" value="Register">
-          </form>
-        </div>
-      </div>
-      {{ else }}
-      <form class="center-form" action="/logout" method="POST">
-          <p>Welcome {{ .User.Email }}!</p>
-          <input type="submit" value="Logout">
-        </form>
-        <a class="center-form" href="/wishlist"><input type="submit" value="My Wishlist"></a>
-      {{ end }}
-      <a class="center-form" href="/allRecords"><input type="submit" value="Explore all records"></a>
-      {{ if eq .User.Role "admin" }}
-      <a class="center-form" style="margin-bottom: 20px;" href="/addRecord"><input type="submit" value="Add new record"></a>
-      {{ end }}
-
-    <section class="new-items">
-      <h2 style="display: flex; justify-content: center;">New Items</h2>
-      <div class="owl-carousel owl-theme">
-          {{ range .Records }}
-              {{ if eq .NewItem true }}
-              <form method="POST" action="/record">
-                <input type="hidden" name="id" value="{{ .ID }}">
-                <div class="record-container">
-                  <div class="record">
-            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
-
-                    <img class="img" style="width: 100%;" src="/img/{{.ImagePath}}" alt="{{.Title}} by {{.Artist}}">
-                    <div class="title">{{ .Title }}</div>
-                    <div class="artist">{{ .Artist }}</div>
-                    <div class="genre">{{ .Genre }}</div>
-                    <div class="price">{{ .Price }}$</div>
-                    <div class="rating" data-rating="{{ .Rating }}"></div>
-                    </button>
-                  </div>
+<div class="welcome-page">
+  <div class="nav">
+    <div class="nav-title"><p>PLast'<br>INka</p></div>
+    <div class="nav-main">
+        <div class="nav-promo"><p>Save 10% on All Albums <span>Code VINYL 10</span></p></div>
+        <ul>
+            <li><a href="#">New Arrivals</a></li>
+            <li><a href="/allRecords">Catalog</a></li>
+            <li><a href="#">Delivery & Payment</a></li>
+            <li><a href="#">Return & Exchange</a></li>
+            <li><a href="#">For Suppliers</a></li>
+        </ul>
+    </div>
+    <div class="nav-preferences">
+        <div class="nav-lang"><a href="/lang-ru">ru</a>/<a href="/lang-en">en</a></div>
+        <div class="nav-user"><a href="/account">Account</a> <a href="/cart">Cart</a></div>
+    </div>
+</div>
+  <div class="wrap">
+      
+  </div>
+  <div class="wrap">
+      <form class="searchbar">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search" name="search" placeholder="Type your search term here...">
+          <button type="submit">Search</button>
+      </form>          
+  </div>
+  <div class="wrap block-container">
+      <div class="col">
+          <div class="block a">
+              <div class="text">
+                  <p>Our</p>
+                  <p>offline</p>
+                  <p>store</p>
               </div>
-          </form>
-            {{ end }}
-          {{ end }}
-      </div>
-    </section>
-
-    <section class="bestsellers">
-      <h2 style="display: flex; justify-content: center;">Bestsellers</h2>
-      <div class="owl-carousel owl-theme">
-        {{ range .Records }}
-        {{ if gt .PurchasedCount 51 }}
-        <form method="POST" action="/record">
-          <input type="hidden" name="id" value="{{ .ID }}">
-          <div class="record-container">
-            <div class="record">
-
-            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
-                <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
-                <div class="title">{{ .Title }}</div>
-                <div class="artist">{{ .Artist }}</div>
-                <div class="genre">{{ .Genre }}</div>
-                <div class="price">{{ .Price }}$</div>
-                <div class="rating" data-rating="{{ .Rating }}"></div>
-            </button>
-          </div>
-
-          </div>
-        </form>
-        
-        {{ end }}
-        {{ end }}
-      </div>
-    </section>
-
-
-    <section class="bestsellers">
-      <h2 style="display: flex; justify-content: center;">Sale</h2>
-      <div class="owl-carousel owl-theme">
-          {{ range .Records }}
-            {{ if eq .Sale true }}
-            <form method="POST" action="/record">
-              <input type="hidden" name="id" value="{{ .ID }}">
-              <div class="record-container">
-                <div class="record">
-            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+              <img src="/img/black_vinyl.png" class="rotate-infinite" alt="">
+              <div id="circ">
+                  &nbsp; · SHOP NOW · SHOP NOW · SHOP NOW · SHOP NOW 
+              </div>
                   
-                  <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
-                  <div class="title">{{ .Title }}</div>
-                  <div class="artist">{{ .Artist }}</div>
-                  <div class="genre">{{ .Genre }}</div>
-                  <div class="price">{{ .Price }}$</div>
-                  <div class="rating" data-rating="{{ .Rating }}"></div>
-                  </button>
-                </div>
-            </div>
-            </form>
-            {{ end }}
-          {{ end }}
+              <a href="#">Read More</a>
+          </div>
+          <div class="row row-img">
+              <div class="block d"></div>
+              <div class="block e">
+                  <p>Sound tasting</p>
+                  <a href="#">Read More</a>
+              </div>
       </div>
-    </section>
-
-
-    <section class="bestsellers">
-      <h2 style="display: flex; justify-content: center;">Pre-Order</h2>
-      <div class="owl-carousel owl-theme">
-          {{ range .Records }}
-            {{ if eq .PreOrder true }}
-            <form method="POST" action="/record">
-              <input type="hidden" name="id" value="{{ .ID }}">
-              <div class="record-container">
-                <div class="record">
+      </div>
+      <div class="col">
+          <div class="block b">
+              <p>Look for <strong>rare vinyl</strong></p>
+              <a href="#">Read More</a>
+          </div>
+          <div class="f1">
+          <div class="block f">
+          </div>
+          </div>
+      </div>
+      <div class="col">
+          <div class="block c"></div>
+          <div class="row">
+              <div class="block g">
+                  <p>WHY US</p>
+                  <p class="mini-text">check out our advantages why it is worth buying vinyl records from us</p>
+              </div>
+              <div class="block h">H</div>
+          </div>
+      </div>
+  </div>
+</div>
+    <!-- <iframe src='https://my.spline.design/untitled-af11e5bc73266227d66bbca6769609aa/' frameborder='0' width='100%' height='100%'></iframe> -->
+<section class="new-items">
+  <h2 class="monoton">New items</h2>
+  <div class="owl-carousel wrap">
+      {{ range .Records }}
+        {{ if eq .NewItem true }}
+          <form method="POST" action="/record">
+            <input type="hidden" name="id" value="{{ .ID }}">
+            <div class="record-container">
+            <div class="record">
             <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
-
-                  <img class="img" style="width: 100%;" src="/img/vinyl.svg" alt="{{.Title}} by {{.Artist}}">
-                  <div class="title">{{ .Title }}</div>
-                  <div class="artist">{{ .Artist }}</div>
-                  <div class="genre">{{ .Genre }}</div>
-                  <div class="price">{{ .Price }}$</div>
-                  <div class="rating" data-rating="{{ .Rating }}"></div>
-                  </button>
-                </div>
+            <img class="img" style="width: 100%;" src="/img/{{ .ImagePath }}" alt="{{.Title}} by {{.Artist}}">
+            <div class="title">{{ .Title }} ({{ .Artist }})</div>
+            <div class="price">{{ .Price }}$</div>
+            </button>
             </div>
-            </form>
-            {{ end }}
-          {{ end }}
+            </div>
+          </form>
+        {{ end }}
+      {{ end }}
+  </div>
+</section>
+
+<section class="bestsellers">
+  <h2 class="monoton">Bestsellers</h2>
+  <div class="owl-carousel wrap">
+    {{ range .Records }}
+    {{ if gt .PurchasedCount 51 }}
+    <form method="POST" action="/record">
+      <input type="hidden" name="id" value="{{ .ID }}">
+      <div class="record-container">
+      <div class="record">
+      <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+      <img class="img" style="width: 100%;" src="/img/{{ .ImagePath }}" alt="{{.Title}} by {{.Artist}}">
+      <div class="title">{{ .Title }} ({{ .Artist }})</div>
+      <div class="price">{{ .Price }}$</div>
+      </button>
       </div>
-    </section>
+      </div>
+    </form>
+    
+    {{ end }}
+    {{ end }}
+  </div>
+</section>
+
+<section class="new-items">
+  <h2 class="monoton">Sale</h2>
+  <div class="owl-carousel wrap">
+      {{ range .Records }}
+        {{ if eq .Sale true }}
+          <form method="POST" action="/record">
+            <input type="hidden" name="id" value="{{ .ID }}">
+            <div class="record-container">
+            <div class="record">
+            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+            <img class="img" style="width: 100%;" src="/img/{{ .ImagePath }}" alt="{{.Title}} by {{.Artist}}">
+            <div class="title">{{ .Title }} ({{ .Artist }})</div>
+            <div class="price">{{ .Price }}$</div>
+            </button>
+            </div>
+            </div>
+          </form>
+        {{ end }}
+      {{ end }}
+  </div>
+</section>
+
+<section class="bestsellers" style="padding-bottom: 150px;">
+  <h2 class="monoton">Pre-order</h2>
+  <div class="owl-carousel wrap">
+    {{ range .Records }}
+    {{ if eq .PreOrder true }}
+    <form method="POST" action="/record">
+      <input type="hidden" name="id" value="{{ .ID }}">
+      <div class="record-container">
+      <div class="record">
+      <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+      <img class="img" style="width: 100%;" src="/img/{{ .ImagePath }}" alt="{{.Title}} by {{.Artist}}">
+      <div class="title">{{ .Title }} ({{ .Artist }})</div>
+      <div class="price">{{ .Price }}$</div>
+      </button>
+      </div>
+      </div>
+    </form>
+    
+    {{ end }}
+    {{ end }}
+  </div>
+</section>
+
+
+<footer style="background-color: #373536; color: #fff; padding: 50px 0;">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <div style="display: flex; flex-wrap: wrap; gap: 60px;">
+      <div style="flex: 1 1 300px; margin-right: 20px;">
+        <h4>About Us</h4>
+        <p>We are a vinyl store that specializes in rare and hard-to-find records from all genres. Our goal is to provide collectors and music lovers with high-quality vinyl at affordable prices.</p>
+      </div>
+      <div style="flex: 1 1 300px; margin-right: 20px;">
+        <h4>Newsletter</h4>
+        <p>Subscribe to our newsletter to stay up-to-date on our latest arrivals, special promotions, and events.</p>
+        <form action="#" method="post" style="display: flex; margin-top: 10px;">
+          <input type="email" name="email" placeholder="  Enter your email" style="flex: 1; margin-right: 10px;">
+          <button type="submit" style="background-color: #b6c5c7; color: #373536; border: none; padding: 10px 20px; font-weight: bold;">Subscribe</button>
+        </form>
+      </div>
+      <div style="flex: 1 1 300px;">
+        <h4>Contact Us</h4>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li><i class="fas fa-map-marker-alt" style="margin-right: 10px;"></i> Almaty, Kazakhstan</li>
+          <li><i class="fas fa-phone" style="margin-right: 10px;"></i> (777) 123-4567</li>
+          <li><i class="fas fa-envelope" style="margin-right: 10px;"></i>info@vinylstore.com</li>
+        </ul>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 20px;">
+      <p>&copy; 2023 Plastinka Vinyl Store. All Rights Reserved.</p>
+    </div>
+  </div>
+</footer>
 
 
 
       <script>
+        let circ = new CircleType(document.getElementById('circ'));
+        // circ.raduis(360);
       const images = document.querySelectorAll("img[src='/img/vinyl.svg']");
     
       images.forEach(img => {
@@ -171,7 +224,7 @@
 
       $('.owl-carousel').owlCarousel({
         loop: false,
-        margin: 50,
+        margin: 10,
         nav: true,
         // navText: [
         //   '<span class="custom-arrow "></span>', 
@@ -182,7 +235,7 @@
             items: 1
           },
           600: {
-            items: 3
+            items: 1
           },
           1000: {
             items: 3
