@@ -127,6 +127,7 @@ body {
   width: 50ch;
   padding: 0 0.6em;
   background: #e7eaeb;
+  outline: none;
 }
 
 .searchbar button {

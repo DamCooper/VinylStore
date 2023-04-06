@@ -1,58 +1,76 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Vinyl Records for Sale</title>
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
-    <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
-    </head>
-    <style>
 
+<head>
+  <meta charset="UTF-8">
+  <title>Vinyl Records for Sale</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+  <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/css/catalog.css">
+</head>
 
-form input[type="text"],
-form select {
-  padding: 8px;
-  margin-right: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  border: none;
-  background-color: #f2f2f2;
-  color: #333;
-}
+<body>
+  <div class="nav">
+    <div class="nav-title">
+      <p><a href="/" style="text-decoration: none; color: initial;">PLast'<br>INka</p></a>
+    </div>
+    <div class="nav-main">
+      <div class="nav-promo">
+        <p>Save 10% on All Albums <span>Code VINYL 10</span></p>
+      </div>
+      <ul>
+        <li><a href="#">New Arrivals</a></li>
+        <li><a href="/allRecords">Catalog</a></li>
+        <li><a href="#">Delivery & Payment</a></li>
+        <li><a href="#">Return & Exchange</a></li>
+        <li><a href="#">For Suppliers</a></li>
+      </ul>
+    </div>
+    <div class="nav-preferences">
+      <div class="nav-lang"><a href="/lang-ru">ru</a>/<a href="/lang-en">en</a></div>
+      <div class="nav-user"><a href="/account">Account</a> <a href="/cart">Cart</a></div>
+    </div>
+  </div>
 
-form button[type="submit"] {
-  padding: 8px 20px;
-  font-size: 16px;
-  border-radius: 4px;
-  border: none;
-  background-color: #424242;
-  cursor: pointer;
-}
+  <div class="wrap">
+    <form class="searchbar" action="/allRecords" method="post">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input autocomplete="off" type="text" id="search" name="q" placeholder="Type your search term here...">
+      <button type="submit">Search</button>
+    </form>
+  </div>
 
-form label {
-  margin-right: 10px;
-  font-size: 16px;
-  color: #fff;
-}
+  <!-- <form class="" action="/allRecords" method="post">
+        <label for="price-filter">Filter by price:</label>
+        <select name="price-filter" id="price-filter">
+          <option value="all">All Prices</option>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+          <option value="0-10">$0-$10</option>
+          <option value="10-20">$10-$20</option>
+          <option value="20-30">$20-$30</option>
+        </select>
+        <label for="rating-filter">Filter by rating:</label>
+        <select name="rating-filter" id="rating-filter">
+          <option value="all">All Ratings</option>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+          <option value="1">1 Star</option>
+          <option value="2">2 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="5">5 Stars</option>
+        </select>
 
-form select {
-  font-size: 16px;
-  border-radius: 4px;
-  border: none;
-  background-color: #f2f2f2;
-  color: #333;
-}
+        <button type="submit" style="color: whitesmoke">Apply Filters</button>
+      </form> -->
 
-
-    </style>
-  <body>
-
-    <h1 style="display: flex; justify-content: center;">Vinyl Records for Sale</h1>
-      {{ if eq .User.Email "false" }}
+  </div>
+  <!-- {{ if eq .User.Email "false" }}
       <div style="display: flex; justify-content: center; gap: 10em;">
         <div>
           <form action="/login" method="POST">
@@ -86,17 +104,13 @@ form select {
         <a class="center-form" href="/wishlist"><input type="submit" value="My Wishlist"></a>
       {{ end }}
       <a class="center-form" href="/allRecords"><input type="submit" value="Explore all records"></a>
-      <a class="center-form" style="margin-bottom: 20px;" href="/addRecord"><input type="submit" value="Add new record"></a>
+      <a class="center-form" style="margin-bottom: 20px;" href="/addRecord"><input type="submit" value="Add new record"></a> -->
 
 
-    <section class="" style="margin-bottom: 0; padding: 50px; background: #1a1a1a; color: #f2f2f2;">
-      <h2 style="display: flex; justify-content: center; margin-bottom: 100px;">All Records</h2>
-
-      <form style="color: whitesmoke" method="post" action="/allRecords">
-        <input type="text" name="q" placeholder="Search...">
-        <button type="submit" style="color: whitesmoke">Search</button>
-      </form>
-      <form style="color: whitesmoke;" action="/allRecords" method="post">
+  <section class="catalog">
+    <div class="flex">
+      <div class="col filter">
+        <!-- <form class="" action="/allRecords" method="post">
         <label for="price-filter">Filter by price:</label>
         <select name="price-filter" id="price-filter">
           <option value="all">All Prices</option>
@@ -110,38 +124,111 @@ form select {
         <select name="rating-filter" id="rating-filter">
           <option value="all">All Ratings</option>
           <option value="asc">Ascending</option>
-          <option value="desc">Descending</option>  
+          <option value="desc">Descending</option>
           <option value="1">1 Star</option>
           <option value="2">2 Stars</option>
           <option value="3">3 Stars</option>
           <option value="4">4 Stars</option>
           <option value="5">5 Stars</option>
         </select>
-      
+
         <button type="submit" style="color: whitesmoke">Apply Filters</button>
-      </form>
-      
-      <div class="grid-container" style="margin-top: 50px;">
+      </form> -->
 
-          {{ range .Records }}
-              <form method="POST" action="/record">
-                <input type="hidden" name="id" value="{{ .ID }}">
-            <div class="record" style="width: 220px; background: white;">
-      <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
-
-              <img class="img" style="width: 100%;" src="/img/{{.ImagePath}}" alt="{{.Title}} by {{.Artist}}">
-              <div class="title">{{ .Title }}</div>
-              <div class="artist">{{ .Artist }}</div>
-              <div class="genre">{{ .Genre }}</div>
-              <div class="price">{{ .Price }}$</div>
-              <div class="rating" data-rating="{{ .Rating }}"></div>
-              </button>
+        <form action="/allRecords" method="post">
+          <div class="filters">
+            <div class="filters-genre">
+              <p class="filters-title">Genres</p>
+              <ul>
+                {{ range $index, $element := .Genres }}
+                <li>
+                  <label class="checkbox-container" for="genre-{{ $index }}">{{ $element }}
+                    <input type="checkbox" id="genre-{{ $index }}" name="genre-filter[]" value="{{ $element }}">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                {{ end }}
+              </ul>
             </div>
-          </form>
-          {{ end }}
-  </div>
 
-    </section>
+            <div class="filters-filter">
+              <p class="filters-title">Filter</p>
+              <ul>
+                <li>
+                  <label class="checkbox-container" for="bestsellers-filter">Bestsellers
+                    <input type="checkbox" id="bestsellers-filter" name="special-filter[]" value="bestseller">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                <li>
+                  <label class="checkbox-container" for="new-items-filter">New items
+                    <input type="checkbox" id="new-items-filter" name="special-filter[]" value="new_item">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                <li>
+                  <label class="checkbox-container" for="pre-order-filter">Preorder
+                    <input type="checkbox" id="pre-order-filter" name="special-filter[]" value="PreOrder">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                <li>
+                  <label class="checkbox-container" for="sale-filter">Sale
+                    <input type="checkbox" id="sale-filter" name="special-filter[]" value="Sale">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                <li>
+                  <label class="checkbox-container" for="filter-price-asc">Price Low to High
+                    <input type="checkbox" id="filter-price-asc" name="price-filter" value="asc">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                <li>
+                  <label class="checkbox-container" for="filter-price-desc">Price High to Low
+                    <input type="checkbox" id="filter-price-desc" name="price-filter" value="desc">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+                <li>
+                  <label class="checkbox-container" for="filter-rating">Highest Rating
+                    <input type="checkbox" id="filter-rating" name="rating-filter" value="desc">
+                    <span class="checkmark"></span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="btns">
+            <button class="filter-btn" type="submit" onclick="saveFilter()">Apply</button>
+            <button class="filter-btn" type="submit" onclick="clearFilter()">Clear</button>
+          </div>
+        </form>
+      </div>
+      <div class="col grid">
+        {{ range $index, $element := .Records }}
+        <form method="POST" action="/record">
+          <input type="hidden" name="id" value="{{ $element.ID }}">
+          <div class="shadow">
+            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
+              <input type="hidden" name="id" value="{{ $element.ID }}">
+              <div class="">
+                <div class="record">
+                  <img class="img" style="width: 100%;" src="/img/{{ $element.ImagePath }}"
+                    alt="{{$element.Title}} by {{$element.Artist}}">
+                  <div class="title">{{ $element.Title }} ({{ $element.Artist }})</div>
+                  <div class="price">{{ $element.Price }}$</div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </form>
+        {{ end }}
+      </div>
+
+    </div>
+
+  </section>
 
 
 
@@ -152,52 +239,92 @@ form select {
 
 
 
-      <script>
-      const images = document.querySelectorAll("img[src='/img/vinyl.svg']");
-    
-      images.forEach(img => {
-        img.style.filter = `hue-rotate(${Math.floor(Math.random() * 360)}deg)`;
+  <script>
+    setFilter();
+
+    const priceAscCheckbox = document.getElementById("filter-price-asc");
+    const priceDescCheckbox = document.getElementById("filter-price-desc");
+
+    priceAscCheckbox.addEventListener("change", function () {
+      if (this.checked) {
+        priceDescCheckbox.checked = false;
+      }
+    });
+
+    priceDescCheckbox.addEventListener("change", function () {
+      if (this.checked) {
+        priceAscCheckbox.checked = false;
+      }
+    });
+
+
+    function clearFilter() {
+      let checked_boxes = document.querySelectorAll("input[type='checkbox']")
+        .forEach(e => e.checked = false);
+      localStorage.setItem('filter-genres', "");
+    }
+    function saveFilter() {
+      let checked_boxes = Array.from(document.querySelectorAll("input[type='checkbox']"))
+        .map((checkbox, index) => {
+          if (checkbox.checked) return index;
+        })
+        .filter(index => index !== undefined);
+      localStorage.setItem('filter-genres', checked_boxes.toString());
+    }
+
+    function setFilter() {
+      let checked_boxes = document.querySelectorAll("input[type='checkbox']");
+      localStorage.getItem('filter-genres').split(',').forEach(e => {
+        checked_boxes[parseInt(e)].checked = true;
       });
+    }
 
-      $('.owl-carousel').owlCarousel({
-        loop: false,
-        margin: 50,
-        nav: true,
-        // navText: [
-        //   '<span class="custom-arrow "></span>', 
-        //   '<span class="custom-arrow "></span>' 
-        // ],
-        responsive: {
-          0: {
-            items: 1
-          },
-          600: {
-            items: 3
-          },
-          1000: {
-            items: 3
-          }
+    const images = document.querySelectorAll("img[src='/img/vinyl.svg']");
+
+    images.forEach(img => {
+      img.style.filter = `hue-rotate(${Math.floor(Math.random() * 360)}deg)`;
+    });
+
+    $('.owl-carousel').owlCarousel({
+      loop: false,
+      margin: 50,
+      nav: true,
+      // navText: [
+      //   '<span class="custom-arrow "></span>', 
+      //   '<span class="custom-arrow "></span>' 
+      // ],
+      responsive: {
+        0: {
+          items: 1
+        },
+        600: {
+          items: 3
+        },
+        1000: {
+          items: 3
         }
-      })
+      }
+    })
 
-      var ratings = document.querySelectorAll(".rating");
+    var ratings = document.querySelectorAll(".rating");
 
-      ratings.forEach(function(rating) {
-        var ratingValue = rating.getAttribute("data-rating");
-        
-        ratingValue = Math.round(ratingValue);
+    ratings.forEach(function (rating) {
+      var ratingValue = rating.getAttribute("data-rating");
 
-        var starsHtml = "";
-        for (var i = 0; i < 5; i++) {
-          if (i < ratingValue) {
-            starsHtml += "<span class='fa fa-star checked'></span>";
-          } else {
-            starsHtml += "<span class='fa fa-star'></span>";
-          }
+      ratingValue = Math.round(ratingValue);
+
+      var starsHtml = "";
+      for (var i = 0; i < 5; i++) {
+        if (i < ratingValue) {
+          starsHtml += "<span class='fa fa-star checked'></span>";
+        } else {
+          starsHtml += "<span class='fa fa-star'></span>";
         }
-        rating.innerHTML = starsHtml;
-      });
+      }
+      rating.innerHTML = starsHtml;
+    });
 
-    </script>
-  </body>
+  </script>
+</body>
+
 </html>

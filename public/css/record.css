@@ -126,6 +126,7 @@ body {
     width: 50ch;
     padding: 0 0.6em;
     background: #e7eaeb;
+    outline: none;
   }
   
   .searchbar button {
@@ -175,15 +176,16 @@ body {
   font-weight: 500;
 }
 .fa-heart {
-  font-size: 1.2em;
+  font-size: 1em;
   background: #e9b759; 
   border-radius: 50%; 
   padding: 5px;
   color: white;
   display: flex;
   position: relative;
-  bottom: -5px;
   cursor: pointer;
+  float: right;
+  margin-left: 20px;
 }
 
 .add-rating input,

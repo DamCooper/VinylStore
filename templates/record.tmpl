@@ -1,53 +1,66 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>Record Details</title>
   <script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
-  <link rel="stylesheet" href="/css/record.css">  
+  <link rel="stylesheet" href="/css/record.css">
   <style>
 
   </style>
 </head>
+
 <body>
   <div class="nav">
-    <div class="nav-title"><p><a href="/">PLast'<br>INka</p></a></div>
+    <div class="nav-title">
+      <p><a href="/">PLast'<br>INka</p></a>
+    </div>
     <div class="nav-main">
-        <div class="nav-promo"><p>Save 10% on All Albums <span>Code VINYL 10</span></p></div>
-        <ul>
-            <li><a href="#">New Arrivals</a></li>
-            <li><a href="/allRecords">Catalog</a></li>
-            <li><a href="#">Delivery & Payment</a></li>
-            <li><a href="#">Return & Exchange</a></li>
-            <li><a href="#">For Suppliers</a></li>
-        </ul>
+      <div class="nav-promo">
+        <p>Save 10% on All Albums <span>Code VINYL 10</span></p>
+      </div>
+      <ul>
+        <li><a href="#">New Arrivals</a></li>
+        <li><a href="/allRecords">Catalog</a></li>
+        <li><a href="#">Delivery & Payment</a></li>
+        <li><a href="#">Return & Exchange</a></li>
+        <li><a href="#">For Suppliers</a></li>
+      </ul>
     </div>
     <div class="nav-preferences">
-        <div class="nav-lang"><a href="/lang-ru">ru</a>/<a href="/lang-en">en</a></div>
-        <div class="nav-user"><a href="/account">Account</a> <a href="/cart">Cart</a></div>
+      <div class="nav-lang"><a href="/lang-ru">ru</a>/<a href="/lang-en">en</a></div>
+      <div class="nav-user"><a href="/account">Account</a> <a href="/cart">Cart</a></div>
     </div>
-</div>
-<div class="wrap">
-  <form class="searchbar">
+  </div>
+  <div class="wrap">
+    <form class="searchbar" action="/allRecords" method="post">
       <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="search" name="search" placeholder="Type your search term here...">
+      <input autocomplete="off" type="text" id="search" name="q" placeholder="Type your search term here...">
       <button type="submit">Search</button>
-  </form>          
-</div>
-    <div class="record">
-      <div class="flex">
-        <div class="col" style="margin-right: 230px;">
+    </form>
+  </div>
+  <div class="record">
+    <div class="flex">
+      <div class="col" style="margin-right: 230px;">
         <img class="img" src="/img/{{.ImagePath}}" alt="{{ .Title}} by {{ .Artist}}">
         <img class="img" style="position: absolute; margin-left: -330px; z-index: -1;" src="/img/black_vinyl.png">
       </div>
-        <div class="col">
-        <div class="title">{{ .Artist }} - {{ .Title}}</div>
-        <div class="rating" data-rating="{{ .Rating}}"></div>
+      <div class="col">
+        <div class="title">
+
+          <p>{{ .Artist }} - {{ .Title}} <i class="fas fa-heart" onclick="submitForm()"></i> </p>
+          <form style="display: inline-block;" id="wishlist-form" action="/addToWishlist" method="POST">
+            <input type="hidden" name="record_id" value="{{  .ID }}">
+            <input type="submit" style="display: none;">
+          </form>
+        </div>
+        <!-- <div class="rating" style="position: relative; top: -2.5em;" data-rating="{{ .Rating}}"></div> -->
         <div class="price">{{ .Price}}$</div>
         <div class="genre">Genre: {{ .Genre}}</div>
         <div class="rating-count">Rating Count: {{ .RatingCount}}</div>
         <div class="purchased-count">Purchased: {{ .PurchasedCount}} times</div>
-        {{ if ne  .Email "false" }}
+        {{ if ne .Email "false" }}
         <form class="record-form" method="POST" action="/record/add-rating">
           <input type="hidden" name="id" value="{{  .ID }}">
           <div class="rating-input">
@@ -59,7 +72,7 @@
               <option value="2">2 stars</option>
               <option value="1">1 star</option>
             </select>
-          <button type="submit">Submit</button> 
+            <button type="submit">Submit</button>
           </div>
         </form>
 
@@ -73,30 +86,25 @@
         {{end}}
         {{end}}
         <p style="font-weight: 500; margin-top: 30px;">Leave a comment</p>
-      <form class="record-form" method="POST" action="/addComment">
-        <input type="hidden" name="record_id" value="{{ .ID}}">
-        <label class="add-rating">
-          <input type="text" name="author" required placeholder="  Your name">
-        </label>
-        <br>
-        <label class="add-rating">
-          <textarea name="body" required placeholder="  Comment"></textarea>
-        </label>
-        <br>
-        <button type="submit">Add Comment</button>
-      </form>
-      </div>
-      
-      <div class="col">
-        <form id="wishlist-form" action="/addToWishlist" method="POST">
-          <input type="hidden" name="record_id" value="{{  .ID }}">
-          <input type="submit" style="display: none;">
-          <i class="fas fa-heart" onclick="submitForm()"></i>
+        <form class="record-form" method="POST" action="/addComment">
+          <input type="hidden" name="record_id" value="{{ .ID}}">
+          <label class="add-rating">
+            <input type="text" name="author" required placeholder="  Your name">
+          </label>
+          <br>
+          <label class="add-rating">
+            <textarea name="body" required placeholder="  Comment"></textarea>
+          </label>
+          <br>
+          <button type="submit">Add Comment</button>
         </form>
+      </div>
+
+      <div class="col">
 
       </div>
-      </div>
-<!-- 
+    </div>
+    <!-- 
         {{ if eq .Email "admin" }}
 
         <form action="/editRecord" method="post">
@@ -104,37 +112,39 @@
           <input type="submit" value="Edit record">
         </form>
         {{ end }} -->
-      {{ end }}
-  
+    {{ end }}
 
-        
-      </div>
-      <script>
-        function submitForm() {
-          var form = document.getElementById("wishlist-form");
-          
-          var submitButton = form.querySelector('input[type="submit"]');
-          submitButton.click();
+
+
+  </div>
+  <script>
+    var ratings = document.querySelectorAll(".rating");
+    ratings.forEach(function (rating) {
+      var ratingValue = rating.getAttribute("data-rating");
+
+      ratingValue = Math.round(ratingValue);
+
+      var starsHtml = "";
+      for (var i = 0; i < 5; i++) {
+        if (i < ratingValue) {
+          starsHtml += "<span class='fa fa-star checked'></span>";
+        } else {
+          starsHtml += "<span class='fa fa-star'></span>";
         }
-          var ratings = document.querySelectorAll(".rating");
-          var title = document.querySelector(".title");
-          title.innerHTML = title.innerHTML.toUpperCase();
+      }
+      rating.innerHTML = starsHtml;
+    });
+    function submitForm() {
+      var form = document.getElementById("wishlist-form");
 
-ratings.forEach(function(rating) {
-  var ratingValue = rating.getAttribute("data-rating");
-  
-  ratingValue = Math.round(ratingValue);
-
-  var starsHtml = "";
-  for (var i = 0; i < 5; i++) {
-    if (i < ratingValue) {
-      starsHtml += "<span class='fa fa-star checked'></span>";
-    } else {
-      starsHtml += "<span class='fa fa-star'></span>";
+      var submitButton = form.querySelector('input[type="submit"]');
+      submitButton.click();
     }
-  }
-  rating.innerHTML = starsHtml;
-});
-      </script>
+
+    var title = document.querySelector(".title").firstChild;
+    title.innerHTML = title.innerHTML.toUpperCase();
+
+  </script>
 </body>
+
 </html>

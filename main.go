@@ -196,7 +196,7 @@ func getUserBySessionId(sessionId string) (*User, error) {
 	return &user, nil
 }
 
-func searchRecords(query string, price_filter string, rating_filter string) ([]Record, error) {
+func searchRecords(query string, price_filter string, rating_filter string, genre_filter []string, special_filter []string) ([]Record, error) {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
 		return nil, err
@@ -208,9 +208,24 @@ func searchRecords(query string, price_filter string, rating_filter string) ([]R
 	// RatingCount    float64
 	// RatingTotal    float64
 
-	sqlQuery := "SELECT id, title, artist, genre, price, image_path, PurchasedCount, Rating FROM records WHERE (title LIKE ? OR artist LIKE ? OR genre LIKE ?)"
+	sqlQuery := "SELECT id, title, artist, genre, price, image_path, PurchasedCount, Rating FROM records WHERE (title LIKE ? OR artist LIKE ?)"
 	var args []interface{}
 	args = append(args, "%"+query+"%", "%"+query+"%", "%"+query+"%")
+
+	if len(genre_filter) > 0 {
+		genres := strings.Join(genre_filter, "', '")
+		sqlQuery += fmt.Sprintf(" AND genre IN ('%s')", genres)
+	}
+
+	if len(special_filter) > 0 {
+		for i := 0; i < len(special_filter); i++ {
+			if special_filter[i] == "bestseller" {
+				sqlQuery += " AND PurchasedCount > 51"
+			} else {
+				sqlQuery += " AND " + special_filter[i] + " = 1"
+			}
+		}
+	}
 
 	if price_filter != "" {
 		switch price_filter {
@@ -246,6 +261,8 @@ func searchRecords(query string, price_filter string, rating_filter string) ([]R
 		}
 	}
 
+	println(sqlQuery)
+
 	rows, err := db.Query(sqlQuery, args...)
 	if err != nil {
 		return nil, err
@@ -269,7 +286,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		query := r.FormValue("q")
 
-		records, err := searchRecords(query, "", "")
+		records, err := searchRecords(query, "", "", nil, nil)
 		if err != nil {
 			http.Error(w, "1Internal Server Error", http.StatusInternalServerError)
 			return
@@ -519,8 +536,12 @@ func allRecords(w http.ResponseWriter, r *http.Request) {
 		query := r.FormValue("q")
 		price_filter := r.FormValue("price-filter")
 		rating_filter := r.FormValue("rating-filter")
+		genre_filter := r.Form["genre-filter[]"]
+		special_filter := r.Form["special-filter[]"]
+		genres := strings.Join(genre_filter, "', '")
+		println(genres)
 
-		records, err = searchRecords(query, price_filter, rating_filter)
+		records, err = searchRecords(query, price_filter, rating_filter, genre_filter, special_filter)
 		if err != nil {
 			http.Error(w, "1Internal Server Error", http.StatusInternalServerError)
 			return
@@ -529,11 +550,21 @@ func allRecords(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
-		Records []Record
-		User    *User
+		Records  []Record
+		User     *User
+		OneThird int
+		TwoThird int
+		Genres   []string
 	}{
-		Records: records,
-		User:    nil,
+		Records:  records,
+		User:     nil,
+		OneThird: 1,
+		TwoThird: 1,
+		Genres:   getDistinctGenres(),
+	}
+	if len(records) > 1 {
+		data.OneThird = len(records) / 3
+		data.TwoThird = (len(records) / 3) * 2
 	}
 
 	user := User{
@@ -572,6 +603,31 @@ func allRecords(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
+}
+
+func getDistinctGenres() []string {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return nil
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT DISTINCT genre FROM records")
+	if err != nil {
+		print(err)
+	}
+	defer rows.Close()
+
+	genres := []string{}
+	for rows.Next() {
+		var genre string
+		err := rows.Scan(&genre)
+		if err != nil {
+			print(err)
+		}
+		genres = append(genres, genre)
+	}
+
+	return genres
 }
 
 func addRecord(record Record) error {
@@ -768,6 +824,41 @@ func getRecordByID(id string) (Record, error) {
 
 	return record, nil
 }
+func accountHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		User *User
+	}{
+		User: nil,
+	}
+	user := User{
+		ID:       100,
+		Email:    "false",
+		Password: "password",
+		Role:     "false",
+	}
+	data.User = &user
+
+	sessionCookie, err := r.Cookie("session_id")
+	if err == nil {
+		session := &Session{ID: sessionCookie.Value}
+		user, err := getUserBySessionId(session.ID)
+		if err == nil {
+			if user != nil {
+				data.User = user
+			}
+		}
+	}
+	tmpl, err := template.ParseFiles("templates/login.tmpl")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+}
 func addCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		err := r.ParseForm()
@@ -849,6 +940,7 @@ func main() {
 	// 	http.HandleFunc(path, viewRecord)
 	// }
 	http.HandleFunc("/search", searchHandler)
+	http.HandleFunc("/account", accountHandler)
 	http.HandleFunc("/addToWishlist", addToWishlist)
 	http.HandleFunc("/wishlist", viewWishlist)
 	http.HandleFunc("/allRecords", allRecords)
