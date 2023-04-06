@@ -1,16 +1,16 @@
 # VinylStore
 REPORT 7
+Myrzabekov Farkhat: redisgn of item filter system.
+Nashkenova Ingkar: full redisign of all item display and record info page. 
 Myrzabekov Farkhat and Nashkenova Ingkar: both worked on creating design for home page.
 Huge design update from old to new and better look website.
 finding fonts/colors/images etc.
 
-from this
-![image](https://user-images.githubusercontent.com/91084290/229882047-5505bb56-3d4c-4fef-b2bf-de43f0a1fdbe.png)
 
-to this
-![image](https://user-images.githubusercontent.com/91084290/229881395-387e1ed4-08ef-4e2d-ba07-1c0f46b0f68e.png)
-![image](https://user-images.githubusercontent.com/91084290/229882631-609ba01a-f4d0-4609-90b2-a8013314bfd9.png)
-![image](https://user-images.githubusercontent.com/91084290/229908097-75ee40dd-70d8-4a1b-a6cc-d7a06beeefea.png)
+![2](https://user-images.githubusercontent.com/91084290/230431903-70d88a91-27ea-4ad9-b4cb-214c5e47a21c.png)
+![1](https://user-images.githubusercontent.com/91084290/230431874-9875a117-5c3a-4063-b38f-b18f073549b6.png)
+![3](https://user-images.githubusercontent.com/91084290/230432523-1c5568ea-14ca-4728-8b7f-1522073c0749.png)
+
 
 
 
