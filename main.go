@@ -1099,49 +1099,69 @@ func addChatMessageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Chat message added successfully"))
 }
 
+// func getChatMessages(w http.ResponseWriter, r *http.Request) {
+// 	fmt.Println("getChatMessages called")
+// 	data := 1
+// 	w.Header().Set("Content-Type", "application/json")
+// 	w.WriteHeader(http.StatusOK)
+// 	json.NewEncoder(w).Encode(data)
+// }
+
 type ChatMessage struct {
-	ID     int
-	UserID int
-	Text   string
-	Time   time.Time
+	ID       int    `json:"id"`
+	UserID   int    `json:"user_id"`
+	Text     string `json:"text"`
+	Time     string `json:"time"`
+	UserName string `json:"user_name"`
 }
 
-func getChatMessages(db *sql.DB) ([]byte, error) {
-	rows, err := db.Query(`
-        SELECT chat_messages.id, chat_messages.user_id, chat_messages.message_text
-        FROM chat_messages
-        JOIN users ON chat_messages.user_id = users.id
-        ORDER BY chat_messages.message_time DESC
-    `)
+func getChatMessages(w http.ResponseWriter, r *http.Request) {
+	// Open the database connection
+	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
-		return nil, err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Query the chat messages
+	rows, err := db.Query(`
+		SELECT chat_messages.id, chat_messages.user_id, chat_messages.message_text, chat_messages.message_time, users.email
+		FROM chat_messages
+		JOIN users ON chat_messages.user_id = users.id
+		ORDER BY chat_messages.message_time DESC
+	`)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer rows.Close()
 
+	// Iterate through the rows and construct the ChatMessage objects
 	messages := []ChatMessage{}
 	for rows.Next() {
-		var id int
-		var user_id int
-		var message string
-		if err := rows.Scan(&id, &user_id, &message); err != nil {
-			return nil, err
+		var id, user_id int
+		var text, time, user_name string
+		if err := rows.Scan(&id, &user_id, &text, &time, &user_name); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 		messages = append(messages, ChatMessage{
-			ID:     id,
-			UserID: user_id,
-			Text:   message,
+			ID:       id,
+			UserID:   user_id,
+			Text:     text,
+			Time:     time,
+			UserName: user_name,
 		})
 	}
-
 	if err := rows.Err(); err != nil {
-		return nil, err
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
-		messages[i], messages[j] = messages[j], messages[i]
-	}
-
-	return json.Marshal(messages)
+	// Encode the ChatMessage objects as JSON and send the response
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(messages)
 }
 
 func chatHandler(w http.ResponseWriter, r *http.Request) {
@@ -1216,6 +1236,7 @@ func main() {
 	http.HandleFunc("/editRecord", editRecordHandler)
 	http.HandleFunc("/addComment", addCommentHandler)
 	http.HandleFunc("/addChatMessage", addChatMessageHandler)
+	http.HandleFunc("/getChatMessages", getChatMessages)
 
 	http.HandleFunc("/", allRecords)
 

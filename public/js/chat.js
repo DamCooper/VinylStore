@@ -21,6 +21,21 @@ form.addEventListener('submit', (e) => {
 setInterval(() => {
   fetch('/getChatMessages')
   .then(res => res.json())
-  .then(data => console.log(data))
+  .then(data => {
+    messages.innerHTML = '';
+    data.forEach(msg => {
+      const div = document.createElement('div');
+      div.classList.add('message');
+      const userSpan = document.createElement('span');
+      userSpan.classList.add('user');
+      userSpan.textContent = msg.user_name + ':';
+      const textSpan = document.createElement('span');
+      textSpan.classList.add('text');
+      textSpan.textContent = msg.text;
+      div.appendChild(userSpan);
+      div.appendChild(textSpan);
+      messages.appendChild(div);
+    });
+  })
   .catch(err => console.error(err));
 }, 5000);
