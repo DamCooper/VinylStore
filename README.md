@@ -1,4 +1,8 @@
 # VinylStore
+REPORT 8
+Myrzabekov Farkhat: added order&purchase system to store all info about sold records.  
+Nashkenova Ingkar: added a live chat feature or a ticketing system for users to ask questions
+
 REPORT 7
 Myrzabekov Farkhat: redisgn of item filter system.
 Nashkenova Ingkar: full redisign of all item display and record info page. 
