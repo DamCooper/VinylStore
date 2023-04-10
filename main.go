@@ -1116,7 +1116,6 @@ type ChatMessage struct {
 }
 
 func getChatMessages(w http.ResponseWriter, r *http.Request) {
-	// Open the database connection
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -1124,7 +1123,6 @@ func getChatMessages(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	// Query the chat messages
 	rows, err := db.Query(`
 		SELECT chat_messages.id, chat_messages.user_id, chat_messages.message_text, chat_messages.message_time, users.email
 		FROM chat_messages
@@ -1137,7 +1135,6 @@ func getChatMessages(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	// Iterate through the rows and construct the ChatMessage objects
 	messages := []ChatMessage{}
 	for rows.Next() {
 		var id, user_id int
@@ -1159,7 +1156,6 @@ func getChatMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Encode the ChatMessage objects as JSON and send the response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(messages)
 }
