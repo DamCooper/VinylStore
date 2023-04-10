@@ -76,7 +76,7 @@
           </div>
         </form>
 
-        {{ if gt (len .Comments) 1 }}
+        {{ if gt (len .Comments) 0 }}
         <h2 style="margin-top: 80px;">Recent reviews</h2>
         {{range .Comments}}
         <div class="comment">

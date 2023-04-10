@@ -93,6 +93,13 @@ padding: 10px;
   overflow-x: scroll;
 }
 
+.fa-basket-shopping {
+  cursor: cell;
+  display: flex;
+  justify-content: end;
+  margin-top: -15px;
+}
+
 
 .record .title::-webkit-scrollbar {
   display: none;
@@ -446,7 +453,7 @@ padding: 10px;
   border: 1px solid gray;
   font-weight: 500;
   width: 60px;
-  
+  padding: 5px 7px;
 }
 .btns {
   display: flex;

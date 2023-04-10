@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>My Cart</title>
+	<link rel="stylesheet" href="/css/cart.css">
+	<script src="https://kit.fontawesome.com/0001e6b446.js" crossorigin="anonymous"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
+</head>
+
+<body>
+	<div class="nav">
+		<div class="nav-title">
+			<p><a href="/" style="text-decoration: none; color: initial;">PLast'<br>INka</p></a>
+		</div>
+		<div class="nav-main">
+			<div class="nav-promo">
+				<p>Save 10% on All Albums <span>Code VINYL 10</span></p>
+			</div>
+			<h2 style="display: flex; align-items: center; justify-content: center;">Ordering</h2>
+		</div>
+		<div class="nav-preferences">
+			<div class="nav-lang"><a href="/lang-ru">ru</a>/<a href="/lang-en">en</a></div>
+			<div class="nav-user"><a href="/account">Account</a> <a href="/cart">Cart</a></div>
+		</div>
+	</div>
+
+	<div class="process-bar">
+		<div class="title">
+			<p>bag</p>
+			<div class="process">
+				<i class="fa-solid fa-basket-shopping"></i>
+			</div>
+		</div>
+
+		<div class="line"></div>
+
+		<div class="title">
+			<p>ordering</p>
+			<div class="process">
+				<i class="fa-solid fa-user"></i>
+			</div>
+		</div>
+
+		<div class="line"></div>
+
+		<div class="title">
+			<p>delivery</p>
+			<div class="process">
+				<i class="fa-solid fa-truck-ramp-box"></i>
+			</div>
+		</div>
+
+		<div class="line"></div>
+
+		<div class="title">
+			<p>payment</p>
+			<div class="process">
+				<i class="fa-solid fa-credit-card"></i>
+			</div>
+		</div>
+	</div>
+	<form action="/order" method="post" id="orderForm">
+		<section class="action">
+			<div class="block bag">
+				<h2 class="monoton">Your ordered items</h2>
+				<div class="cart">
+					{{ range . }}
+					<div class="item">
+						<div class="img">
+							<img class="record-img" src="/img/{{ .ImagePath }}" alt="">
+							<img class="vinyl" src="/img/black_vinyl.png" alt="">
+						</div>
+
+						<div class="">
+							<p class="artist">{{ .Artist }}</p>
+							<p class="title">{{ .Title }}</p>
+						</div>
+
+						<div class="">
+							<p class="price" data-price="{{.Price}}">${{ .Price }}</p>
+						</div>
+
+						<div class="count-container">
+							<i class="fa-regular fa-circle-left"></i>
+							<p class="count">1</p>
+							<i class="fa-regular fa-circle-right"></i>
+							<input type="hidden" name="record-id[]" id="record-{{ .ID }}" value="{{ .ID }}">
+							<input type="hidden" name="record-count[]" id="record-count-{{ .ID }}" value="1">
+						</div>
+
+						<div>
+							<p class="delete"><i class="fa-regular fa-trash-can"></i></p>
+						</div>
+
+					</div>
+					{{ end }}
+				</div>
+			</div>
+
+			<div class="block order">
+				<input name="fullname" type="text" placeholder="Enter your full name" required>
+				<input name="number" type="number" placeholder="+7(___)___-__-__" required>
+				<input name="email" type="email" placeholder="Enter your e-mail" required>
+			</div>
+
+			<div class="block delivery">
+				<input name="address" type="text" placeholder="Enter your delivery address" required>
+			</div>
+
+			<div class="block payment">
+				<label for="cardholder-name">Cardholder Name:</label>
+				<input type="text" id="cardholder-name" name="cardholder-name" required>
+
+				<label for="card-number">Card Number:</label>
+				<input type="text" id="card-number" name="card-number" required>
+
+				<label for="expiration-date">Expiration Date:</label>
+				<input type="text" id="expiration-date" name="expiration-date" placeholder="MM / YY" required>
+
+				<label for="cvv">CVV:</label>
+				<input type="text" id="cvv" name="cvv" required>
+				<button type="submit">Submit Payment</button>
+			</div>
+		</section>
+
+		<section class="summary">
+			<p
+				style="display: flex; justify-content: center; font-size: 1.3em; font-weight: 500; padding: 10px 0 20px 0;">
+				ORDER SUMMARY</p>
+			<div class="flex first">
+				<p>Enter coupon code</p>
+				<input name="coupon" type="text">
+				<input type="button" value="Apply">
+			</div>
+
+			<div class="flex second">
+				<p>Total amount</p>
+				<p id="total-cost">$46.00</p>
+				<input type="hidden" name="total-price" id="total-price" value="0">
+			</div>
+
+			<div class="flex third">
+				<input type="button" value="Continue shopping">
+				<input onclick="saveOrder()" class="yellow" type="button" value="Continue ordering">
+			</div>
+
+		</section>
+	</form>
+	<!-- {{if .}}
+		<table>
+			<tr>
+				<th>Title</th>
+				<th>Artist</th>
+				<th>Price</th>
+			</tr>
+			{{range .}}
+			<tr>
+				<td>{{.Title}}</td>
+				<td>{{.Artist}}</td>
+				<td>{{.Price}}</td>
+			</tr>
+			{{end}}
+		</table>
+	{{else}}
+		<p>You have no records in your cart.</p>
+	{{end}} -->
+
+	<script>
+		const priceContainers = document.querySelectorAll('.price');
+		const totalCostContainer = document.querySelector('#total-cost');
+		const totalCostInput = document.querySelector('#total-price');
+		const orderForm = document.querySelector('#orderForm');
+
+		function printOrderForm() {
+			const inputs = document.querySelectorAll('input');
+
+			for (let i = 0; i < inputs.length; i++) {
+				const input = inputs[i];
+				console.log(input.name + ': ' + input.value);
+			}
+		}
+
+		function saveOrder() {
+			let records = document.querySelectorAll(".record-id");
+			let s = "";
+			for (let i = 0; i < records.length; i++) {
+				if (i == records.length - 1) {
+					s += records[i].value;
+				} else {
+					s += records[i].value + ", ";
+				}
+			}
+			localStorage.setItem('order-ids', s);
+			s = "";
+			let counts = document.querySelectorAll(".count");
+			for (let i = 0; i < counts.length; i++) {
+				if (i == counts.length - 1) {
+					s += counts[i].textContent;
+				} else {
+					s += counts[i].textContent + ", ";
+				}
+			}
+			localStorage.setItem('counts', s);
+		}
+
+		let process = document.querySelectorAll(".process");
+		let block = document.querySelectorAll(".block");
+		block.forEach(e => e.style.display = "none");
+		process.forEach(e => e.style.color = "gray");
+		block[0].style.display = 'initial';
+		process[0].style.background = "#c4c4c4";
+		process[0].style.color = "initial";
+		for (let i = 0; i < process.length; i++) {
+			process[i].addEventListener('click', e => {
+				block.forEach(e => {
+					e.style.display = "none";
+				});
+				block[i].style.display = 'initial';
+
+				for (let j = 0; j < process.length; j++) {
+					if (j <= i) {
+						process[j].style.background = "#c4c4c4";
+					}
+					else {
+						process[j].style.background = "initial";
+						process[j].style.color = "gray";
+					}
+				}
+				process[i].style.color = "initial";
+			});
+		}
+
+		document.querySelectorAll('.cart .artist').forEach(e => e.innerHTML = e.innerHTML.toUpperCase());
+		document.querySelectorAll('.cart .title').forEach(e => e.innerHTML = e.innerHTML.toUpperCase());
+
+		function createCounter(containerElement, priceContainer) {
+			const countElement = containerElement.querySelector('.count');
+			const leftArrowElement = containerElement.querySelector('.fa-circle-left');
+			const rightArrowElement = containerElement.querySelector('.fa-circle-right');
+
+			let count = parseInt(countElement.textContent);
+
+			updateLeftArrowColor();
+
+			leftArrowElement.addEventListener('click', () => {
+				if (count > 1) {
+					count--;
+					countElement.textContent = count;
+					updateLeftArrowColor();
+				}
+			});
+
+			rightArrowElement.addEventListener('click', () => {
+				count++;
+				countElement.textContent = count;
+				updateLeftArrowColor();
+			});
+
+			function updateLeftArrowColor() {
+				priceContainer.textContent = `$${count * parseFloat(priceContainer.getAttribute('data-price'))}`;
+				priceContainer.setAttribute('data-count', count);
+				containerElement.childNodes[9].value = count;
+				console.log(containerElement.childNodes[7].value, containerElement.childNodes[9].value);
+
+				let totalCost = 0;
+				priceContainers.forEach(e => {
+					totalCost += parseFloat(e.getAttribute('data-price')) * parseFloat(e.getAttribute('data-count'));
+				});
+				totalCostContainer.textContent = `$${totalCost.toFixed(2)}`;
+				totalCostInput.setAttribute('value', totalCost.toFixed(2));
+				if (count === 1) {
+					leftArrowElement.classList.add('disabled');
+				} else {
+					leftArrowElement.classList.remove('disabled');
+				}
+			}
+		}
+
+		const countContainers = document.querySelectorAll('.count-container');
+
+		for (let i = 0; i < countContainers.length; i++) {
+			createCounter(countContainers[i], priceContainers[i]);
+
+		}
+
+	</script>
+</body>
+
+</html>

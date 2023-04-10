@@ -210,24 +210,26 @@
         <form method="POST" action="/record">
           <input type="hidden" name="id" value="{{ $element.ID }}">
           <div class="shadow">
-            <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
-              <input type="hidden" name="id" value="{{ $element.ID }}">
-              <div class="">
-                <div class="record">
+            <div class="">
+              <div class="record">
+                <button type="submit" style="border: none; background: none; padding: 0; margin: 0; cursor: pointer;">
                   <img class="img" style="width: 100%;" src="/img/{{ $element.ImagePath }}"
                     alt="{{$element.Title}} by {{$element.Artist}}">
                   <div class="title">{{ $element.Title }} ({{ $element.Artist }})</div>
                   <div class="price">{{ $element.Price }}$</div>
-                </div>
+                </button>
+                <i class="fa-solid fa-basket-shopping" data-id="{{ $element.ID }}" onclick="addToCart('{{ $element.ID }}')"></i>
               </div>
-            </button>
+            </div>
           </div>
         </form>
         {{ end }}
       </div>
 
     </div>
-
+    <form id="addToCartForm" style="display: none;" action="/addToCart" method="post">
+      <input type="text" name="record_id" value="1">
+    </form>
   </section>
 
 
@@ -240,6 +242,14 @@
 
 
   <script>
+    function addToCart(id) {
+      let form = document.querySelector("#addToCartForm");
+      let input = document.querySelector("#addToCartForm input");
+      input.setAttribute("value", id);
+      form.submit();
+    }
+
+
     setFilter();
 
     const priceAscCheckbox = document.getElementById("filter-price-asc");

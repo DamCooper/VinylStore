@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" href="/css/chat.css">
+</head>
+
+<body>
+    <h1>Chat</h1>
+
+    <form id="message-form" action="/addChatMessage" method="post">
+        <input type="text" name="message_text" placeholder="Type your message...">
+        <input type="submit" value="Send">
+    </form>
+    <div id="messages">
+        {{range .Messages}}
+        <div class="message">
+            <span class="user">{{.UserID}}:</span>
+            <span class="text">{{.Text}}</span>
+        </div>
+        {{end}}
+    </div>
+
+
+
+    <script type="text/javascript" src="/js/chat.js"></script>
+</body>
+
+</html>

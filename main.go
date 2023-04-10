@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -927,6 +928,265 @@ func getCommentsByRecordID(recordID string) ([]Comment, error) {
 	return comments, nil
 }
 
+func addToCartHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	sessionID := cookie.Value
+
+	user, err := getUserBySessionId(sessionID)
+	if err != nil || user == nil {
+		return
+	}
+
+	recordID := r.FormValue("record_id")
+	println(recordID)
+	if recordID == "" {
+		return
+	}
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("INSERT INTO cart (user_id, record_id) VALUES (?, ?)", user.ID, recordID)
+	if err != nil {
+		return
+	}
+	http.Redirect(w, r, "/cart", http.StatusFound)
+}
+
+func cartHandler(w http.ResponseWriter, r *http.Request) {
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	session := &Session{ID: sessionCookie.Value}
+	user, err := getUserBySessionId(session.ID)
+	if err != nil || user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT r.id, r.title, r.artist, r.price, r.image_path FROM cart w JOIN records r ON w.record_id=r.id WHERE w.user_id=?", user.ID)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+	var records []Record
+	for rows.Next() {
+		var record Record
+		err = rows.Scan(&record.ID, &record.Title, &record.Artist, &record.Price, &record.ImagePath)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		records = append(records, record)
+	}
+	err = rows.Err()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	tmpl, err := template.ParseFiles("templates/cart.tmpl")
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, records)
+}
+
+func orderHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	sessionID := cookie.Value
+
+	user, err := getUserBySessionId(sessionID)
+	if err != nil || user == nil {
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		r.ParseForm()
+		record_id := r.Form["record-id[]"]
+		record_count := r.Form["record-count[]"]
+		fullname := r.FormValue("fullname")
+		// number := r.FormValue("number")
+		email := r.FormValue("email")
+		address := r.FormValue("address")
+		coupon := r.FormValue("coupon")
+		total_price := r.FormValue("total-price")
+
+		db, err := sql.Open("sqlite3", "records.db")
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+		result, err := db.Exec("INSERT INTO orders (user_id, customer_name, customer_email, delivery_address, total_price, coupon_code) VALUES (?, ?, ?, ?, ?, ?)", user.ID, fullname, email, address, total_price, coupon)
+		if err != nil {
+			return
+		}
+
+		orderID, err := result.LastInsertId()
+		if err != nil {
+			return
+		}
+
+		for i := 0; i < len(record_id); i++ {
+			_, err = db.Exec("INSERT INTO order_items (order_id, record_id, quantity) VALUES (?, ?, ?)", orderID, record_id[i], record_count[i])
+			if err != nil {
+				return
+			}
+		}
+
+	}
+}
+
+func addChatMessageHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	sessionID := cookie.Value
+
+	user, err := getUserBySessionId(sessionID)
+	if err != nil || user == nil {
+		return
+	}
+
+	userID := user.ID
+	messageText := r.FormValue("message_text")
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	_, err = db.Exec("INSERT INTO chat_messages (user_id, message_text) VALUES (?, ?)", userID, messageText)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Chat message added successfully"))
+}
+
+type ChatMessage struct {
+	ID     int
+	UserID int
+	Text   string
+	Time   time.Time
+}
+
+func getChatMessages(db *sql.DB) ([]byte, error) {
+	rows, err := db.Query(`
+        SELECT chat_messages.id, chat_messages.user_id, chat_messages.message_text
+        FROM chat_messages
+        JOIN users ON chat_messages.user_id = users.id
+        ORDER BY chat_messages.message_time DESC
+    `)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	messages := []ChatMessage{}
+	for rows.Next() {
+		var id int
+		var user_id int
+		var message string
+		if err := rows.Scan(&id, &user_id, &message); err != nil {
+			return nil, err
+		}
+		messages = append(messages, ChatMessage{
+			ID:     id,
+			UserID: user_id,
+			Text:   message,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
+	}
+
+	return json.Marshal(messages)
+}
+
+func chatHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT user_id, message_text, message_time FROM chat_messages ORDER BY message_time ASC")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var messages []ChatMessage
+	for rows.Next() {
+		var message ChatMessage
+		err := rows.Scan(&message.UserID, &message.Text, &message.Time)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		messages = append(messages, message)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("templates/chat.tmpl")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, struct {
+		Messages []ChatMessage
+	}{
+		messages,
+	})
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
@@ -934,11 +1194,19 @@ func main() {
 	}
 	defer db.Close()
 	// db.Exec("DELETE FROM sessions")
+	// db.Exec("DELETE FROM chat_messages")
+
+	// db.Exec("DELETE FROM orders")
+	// db.Exec("DELETE FROM order_items")
 
 	// for i := 0; i < 100; i++ {
 	// 	path := fmt.Sprintf("/record/%d", i)
 	// 	http.HandleFunc(path, viewRecord)
 	// }
+	http.HandleFunc("/addToCart", addToCartHandler)
+	http.HandleFunc("/chat", chatHandler)
+	http.HandleFunc("/order", orderHandler)
+	http.HandleFunc("/cart", cartHandler)
 	http.HandleFunc("/search", searchHandler)
 	http.HandleFunc("/account", accountHandler)
 	http.HandleFunc("/addToWishlist", addToWishlist)
@@ -947,11 +1215,13 @@ func main() {
 	http.HandleFunc("/addRecord", addRecordHandler)
 	http.HandleFunc("/editRecord", editRecordHandler)
 	http.HandleFunc("/addComment", addCommentHandler)
+	http.HandleFunc("/addChatMessage", addChatMessageHandler)
 
 	http.HandleFunc("/", allRecords)
 
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("public/css"))))
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("public/img"))))
+	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("public/js"))))
 
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/register", registerHandler)
