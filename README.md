@@ -1,4 +1,7 @@
-# VinylStore
+VinylStore
+Project Overview
+This project is a web application for a vinyl record store that allows users to browse, search, and purchase vinyl records. Users can also register and login to the website to access additional features such as adding records to a wishlist, commenting on records, and rating records.
+
 REPORT 8
 Myrzabekov Farkhat: added order&purchase system to store all info about sold records.  
 Nashkenova Ingkar: added a live chat feature or a ticketing system for users to ask questions
