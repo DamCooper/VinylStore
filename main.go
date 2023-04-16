@@ -19,6 +19,24 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type Order struct {
+	ID              int
+	UserID          int
+	CustomerName    string
+	CustomerEmail   string
+	DeliveryAddress string
+	TotalPrice      float64
+	CouponCode      string
+	OrderDate       string
+}
+
+type OrderItem struct {
+	ID       int
+	OrderID  int
+	RecordID int
+	Quantity int
+}
+
 type Comment struct {
 	ID       int64
 	RecordID string
@@ -41,6 +59,7 @@ type Record struct {
 	RatingCount    float64
 	RatingTotal    float64
 	Email          string
+	SamplePath     string
 	Comments       []Comment
 }
 
@@ -57,6 +76,111 @@ type Session struct {
 }
 
 var store = sessions.NewCookieStore([]byte("secret"))
+
+func getOrderHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		return
+	}
+	defer db.Close()
+
+	sessionCookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	session := &Session{ID: sessionCookie.Value}
+	user, err := getUserBySessionId(session.ID)
+	if err != nil || user == nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	userID := user.ID
+
+	ordersQuery := `
+			SELECT o.id, o.user_id, o.customer_name, o.customer_email,
+				o.delivery_address, o.total_price, o.coupon_code, o.order_date
+			FROM orders o
+			WHERE o.user_id = ?`
+
+	orderItemsQuery := `
+			SELECT oi.id, oi.order_id, oi.record_id, oi.quantity
+			FROM order_items oi
+			INNER JOIN orders o ON oi.order_id = o.id
+			WHERE o.user_id = ?`
+
+	rows, err := db.Query(ordersQuery, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var orders []Order
+	for rows.Next() {
+		var order Order
+		err := rows.Scan(&order.ID, &order.UserID, &order.CustomerName,
+			&order.CustomerEmail, &order.DeliveryAddress, &order.TotalPrice,
+			&order.CouponCode, &order.OrderDate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		orders = append(orders, order)
+	}
+	if err := rows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	orderItemsRows, err := db.Query(orderItemsQuery, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer orderItemsRows.Close()
+
+	orderItems := make(map[int][]OrderItem)
+	for orderItemsRows.Next() {
+		var orderItem OrderItem
+		err := orderItemsRows.Scan(&orderItem.ID, &orderItem.OrderID,
+			&orderItem.RecordID, &orderItem.Quantity)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		orderItems[orderItem.OrderID] = append(orderItems[orderItem.OrderID], orderItem)
+	}
+	if err := orderItemsRows.Err(); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type orderWithItems struct {
+		Order
+		OrderItems []OrderItem
+	}
+
+	var ordersWithItems []orderWithItems
+	for _, order := range orders {
+		ordersWithItems = append(ordersWithItems, orderWithItems{
+			Order:      order,
+			OrderItems: orderItems[order.ID],
+		})
+	}
+
+	tmpl, err := template.ParseFiles("templates/orderhistory.tmpl")
+	if err != nil {
+		http.Error(w, "Internal Server Errorzz", http.StatusInternalServerError)
+		return
+	}
+
+	err = tmpl.Execute(w, ordersWithItems)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+}
 
 func verifyUser(email, password string) (*User, error) {
 	db, err := sql.Open("sqlite3", "records.db")
@@ -381,7 +505,7 @@ func getRecordById(id string) (*Record, error) {
 	defer db.Close()
 
 	var record Record
-	err = db.QueryRow("SELECT id, title, artist, genre, price, image_path, new_item, PurchasedCount, Sale, PreOrder, rating, rating_count, rating_total FROM records WHERE id = ?", id).Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.NewItem, &record.PurchasedCount, &record.Sale, &record.PreOrder, &record.Rating, &record.RatingCount, &record.RatingTotal)
+	err = db.QueryRow("SELECT id, title, artist, genre, price, image_path, new_item, PurchasedCount, Sale, PreOrder, rating, rating_count, rating_total, sample_path FROM records WHERE id = ?", id).Scan(&record.ID, &record.Title, &record.Artist, &record.Genre, &record.Price, &record.ImagePath, &record.NewItem, &record.PurchasedCount, &record.Sale, &record.PreOrder, &record.Rating, &record.RatingCount, &record.RatingTotal, &record.SamplePath)
 	if err != nil {
 		return nil, err
 	}
@@ -1219,7 +1343,9 @@ func main() {
 	// 	path := fmt.Sprintf("/record/%d", i)
 	// 	http.HandleFunc(path, viewRecord)
 	// }
+	// getOrderHistoryHandler
 	http.HandleFunc("/addToCart", addToCartHandler)
+	http.HandleFunc("/orderHistory", getOrderHistoryHandler)
 	http.HandleFunc("/chat", chatHandler)
 	http.HandleFunc("/order", orderHandler)
 	http.HandleFunc("/cart", cartHandler)
@@ -1239,6 +1365,7 @@ func main() {
 	http.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("public/css"))))
 	http.Handle("/img/", http.StripPrefix("/img/", http.FileServer(http.Dir("public/img"))))
 	http.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("public/js"))))
+	http.Handle("/samples/", http.StripPrefix("/samples/", http.FileServer(http.Dir("public/samples"))))
 
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/register", registerHandler)
@@ -1274,7 +1401,7 @@ func queryRecords(db *sql.DB, sort string) ([]Record, error) {
 	var records []Record
 	for rows.Next() {
 		var r Record
-		err := rows.Scan(&r.ID, &r.Title, &r.Artist, &r.Genre, &r.Price, &r.ImagePath, &r.NewItem, &r.PurchasedCount, &r.Sale, &r.PreOrder, &r.Rating, &r.RatingCount, &r.RatingTotal)
+		err := rows.Scan(&r.ID, &r.Title, &r.Artist, &r.Genre, &r.Price, &r.ImagePath, &r.NewItem, &r.PurchasedCount, &r.Sale, &r.PreOrder, &r.Rating, &r.RatingCount, &r.RatingTotal, &r.SamplePath)
 		if err != nil {
 			return nil, err
 		}

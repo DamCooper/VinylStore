@@ -60,6 +60,11 @@
         <div class="genre">Genre: {{ .Genre}}</div>
         <div class="rating-count">Rating Count: {{ .RatingCount}}</div>
         <div class="purchased-count">Purchased: {{ .PurchasedCount}} times</div>
+        <audio controls>
+          <source src="/samples/{{ .ID }}.mp3" type="audio/mp3">
+          Your browser does not support the audio element.
+        </audio>
+
         {{ if ne .Email "false" }}
         <form class="record-form" method="POST" action="/record/add-rating">
           <input type="hidden" name="id" value="{{  .ID }}">
