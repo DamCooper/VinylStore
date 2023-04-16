@@ -2,6 +2,10 @@ VinylStore
 Project Overview
 This project is a web application for a vinyl record store that allows users to browse, search, and purchase vinyl records. Users can also register and login to the website to access additional features such as adding records to a wishlist, commenting on records, and rating records.
 
+REPORT 9
+Myrzabekov Farkhat: added handler and template to display the order history of a logged-in user. This function checks if the user is authenticated, retrieves their order history and order items from the database, formats the data and displays it in an HTML page, and sends error responses if any issues occur.
+Nashkenova Ingkar: added functionality to listen sample music in our website. The implementation for adding a record's sample audio involves adding a new column "sample_path" to the "records" table in the database to store the file path to the audio sample. Additionally, the "viewRecord" handler is modified to include the audio information when passing data to the template, and the template is also updated to display the audio in the HTML page.
+
 REPORT 8
 Myrzabekov Farkhat: added order&purchase system to store all info about sold records.  
 Nashkenova Ingkar: added a live chat feature or a ticketing system for users to ask questions
