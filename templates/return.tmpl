@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="/return" method="post">
+        <label for="order-item-id">Order item ID:</label>
+        <input type="text" id="order-item-id" name="order_item_id" required><br>
+      
+        <label for="return-date">Return date:</label>
+        <input type="date" id="return-date" name="return_date" required><br>
+      
+        <label for="reason">Reason for return:</label>
+        <textarea id="reason" name="reason" required></textarea><br>
+      
+        <button type="submit">Submit return</button>
+      </form>
+      
+</body>
+</html>

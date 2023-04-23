@@ -1327,6 +1327,100 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func submitReturnHandler(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session_id")
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+	sessionID := cookie.Value
+
+	user, err := getUserBySessionId(sessionID)
+	if err != nil || user == nil {
+		return
+	}
+
+	if r.Method != "POST" {
+		tmpl, err := template.ParseFiles("templates/return.tmpl")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		tmpl.Execute(w, nil)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	orderItemID := r.FormValue("order_item_id")
+	returnDate := r.FormValue("return_date")
+	reason := r.FormValue("reason")
+
+	db, err := sql.Open("sqlite3", "records.db")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	var orderID int
+	// err = db.QueryRow("SELECT id FROM order_items WHERE id = ? AND order_id = ?", orderItemID, user.ID).Scan(&orderID)
+	err = db.QueryRow("SELECT order_items.id FROM orders JOIN order_items ON orders.id = order_items.order_id WHERE order_items.id = ? AND orders.user_id = ?", orderItemID, user.ID).Scan(&orderID)
+	if err != nil {
+		http.Error(w, "You cannot return this item as it does not belong to you.", http.StatusBadRequest)
+		return
+	}
+
+	stmt, err := db.Prepare("INSERT INTO returns(order_item_id, return_date, reason) VALUES(?, ?, ?)")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(orderItemID, returnDate, reason)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func subscribeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" {
+		email := r.FormValue("email")
+
+		db, err := sql.Open("sqlite3", "records.db")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		defer db.Close()
+
+		stmt, err := db.Prepare("INSERT INTO newsletter_users (email) VALUES (?)")
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		defer stmt.Close()
+
+		_, err = stmt.Exec(email)
+		if err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Fprintf(w, "Thank you for subscribing!")
+	} else {
+		http.NotFound(w, r)
+	}
+}
+
 func main() {
 	db, err := sql.Open("sqlite3", "records.db")
 	if err != nil {
@@ -1334,6 +1428,7 @@ func main() {
 	}
 	defer db.Close()
 	// db.Exec("DELETE FROM sessions")
+	// db.Exec("CREATE TABLE returns ( id INTEGER PRIMARY KEY AUTOINCREMENT, order_item_id INTEGER NOT NULL, return_date DATE NOT NULL, reason TEXT, FOREIGN KEY (order_item_id) REFERENCES order_items(id) )")
 	// db.Exec("DELETE FROM chat_messages")
 
 	// db.Exec("DELETE FROM orders")
@@ -1345,6 +1440,8 @@ func main() {
 	// }
 	// getOrderHistoryHandler
 	http.HandleFunc("/addToCart", addToCartHandler)
+	http.HandleFunc("/newsletter", subscribeHandler)
+	http.HandleFunc("/return", submitReturnHandler)
 	http.HandleFunc("/orderHistory", getOrderHistoryHandler)
 	http.HandleFunc("/chat", chatHandler)
 	http.HandleFunc("/order", orderHandler)
