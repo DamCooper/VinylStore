@@ -1,6 +1,10 @@
-VinylStore
-Project Overview
-This project is a web application for a vinyl record store that allows users to browse, search, and purchase vinyl records. Users can also register and login to the website to access additional features such as adding records to a wishlist, commenting on records, and rating records.
+Introduction to the service: Welcome to our vinyl website for music lovers! Here you'll find a great selection of vinyl records from various genres, ranging from classic rock to jazz and everything in between. We offer competitive prices and are always on the lookout for new and exciting titles to add to our collection.
+
+In addition to our selection of vinyl records, we also offer a variety of features to enhance your shopping experience. You can rate and review records, add them to your wishlist, and even leave comments on individual record pages. We also have a helpful search function to help you find exactly what you're looking for.
+
+We pride ourselves on providing top-notch customer service and want to ensure that your experience with us is always a positive one. So, whether you're a seasoned vinyl collector or just getting started, we hope you'll find something you love on our website. Happy shopping!
+
+Explanation how to run the code: open command line in project folder and type "go run main.go", then go to page http://localhost:8080/
 
 REPORT 10
 Myrzabekov Farkhat: added functionality to return purchased vinyl to customers.
